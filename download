@@ -1,0 +1,112 @@
+# EURUSD Signal Bot
+
+An automated EUR/USD trading-signal generator that:
+
+- Pulls OHLC candles (5min, 1h, 3h, 1day) from **Twelve Data**
+- Runs 5 technical techniques (RSI, MA cross, MACD, Bollinger, EMA trend) that **vote** buy/sell
+- Combines votes with **self-adjusting weights** and **multi-timeframe confirmation** (1h + 1day must agree)
+- Calculates **ATR-based TP/SL** (volatility-aware, not fixed pips)
+- Posts signals + results to **Discord** via webhook
+- **Live web dashboard** (GitHub Pages) showing stats, equity curve, technique weights, and full signal history
+- **Learns over time**: when a signal hits TP (win) or SL (loss), the techniques that contributed get their weights nudged up or down
+- Runs **free** on GitHub Actions cron
+
+> ⚠️ **Educational project. Not financial advice.** Free data is delayed; most retail signal bots lose money after spread. Paper-trade only. Do not risk real money.
+
+---
+
+## How it works (one cycle)
+
+1. Fetch all timeframes.
+2. Check any OPEN signal — did the latest 5min candle hit its TP or SL? If so: close it, learn from the outcome, post the result.
+3. If no signal is open, score the techniques across confirming timeframes. If they agree and the score clears the threshold, fire a new signal, log it, and post it.
+
+State (weights + signal history) lives in `signals.db` (SQLite), committed back to the repo each run so learning persists.
+
+---
+
+## Setup
+
+### 1. Get a free Twelve Data API key
+- Sign up at https://twelvedata.com/pricing (Basic / free tier).
+- Copy your API key.
+
+### 2. Create a Discord webhook
+- In your Discord server: **Server Settings → Integrations → Webhooks → New Webhook**.
+- Pick the channel, click **Copy Webhook URL**.
+
+### 3. Put the code on GitHub
+- Create a new repository (can be **private**).
+- Upload all these files (keep the folder structure, including `.github/workflows/bot.yml`).
+
+### 4. Add your secrets
+In the repo: **Settings → Secrets and variables → Actions → New repository secret**. Add two:
+
+| Name | Value |
+|------|-------|
+| `TWELVE_DATA_API_KEY` | your Twelve Data key |
+| `DISCORD_WEBHOOK_URL` | your Discord webhook URL |
+
+### 5. Enable Actions write permission
+**Settings → Actions → General → Workflow permissions → Read and write permissions** → Save.
+(Needed so the bot can commit the updated database.)
+
+### 6. Run it
+- Go to the **Actions** tab → **EURUSD Signal Bot** → **Run workflow** (manual test).
+- After that it runs automatically every 15 minutes.
+
+### 7. Turn on the dashboard (GitHub Pages)
+- **Settings → Pages**.
+- Under **Source**, choose **Deploy from a branch**.
+- Branch: **main** (or your default), Folder: **/docs**. Save.
+- Wait ~1 minute. Your dashboard is live at:
+  `https://<your-username>.github.io/<your-repo>/`
+- It auto-refreshes its data every time the bot runs and commits `docs/data.json`.
+
+The dashboard shows: total/win/loss/open counts, win rate, a cumulative equity curve, the self-adjusting technique weights, and a full signal history table. It's a static page reading `docs/data.json` — no server needed, completely free.
+
+---
+
+## Run locally (optional)
+
+```bash
+pip install -r requirements.txt
+export TWELVE_DATA_API_KEY="your_key"
+export DISCORD_WEBHOOK_URL="your_webhook"
+python main.py
+```
+
+Test the logic offline with no API key or Discord:
+
+```bash
+python test_offline.py
+```
+
+---
+
+## Tuning
+
+All knobs live in `config.py`:
+
+- `SIGNAL_THRESHOLD` — higher = fewer, higher-conviction signals
+- `TP_ATR_MULT`, `SL_ATR_MULT` — risk/reward sizing
+- `CONFIRM_TIMEFRAMES` — which timeframes must agree
+- `LEARN_RATE` — how fast weights adapt
+
+## Add your own technique
+
+In `techniques.py`, write a function `def my_vote(df) -> int` returning `+1`/`-1`/`0`, then add it to the `TECHNIQUES` dict. The learning system picks it up automatically.
+
+---
+
+## Free-tier limits to know
+
+- **Twelve Data free**: ~800 requests/day, 8/min. This bot uses 3 calls/run; at every 15 min that's ~288/day — within limits.
+- **GitHub Actions free**: 2,000 minutes/month for private repos (unlimited for public). Each run is ~1 min.
+- **Discord webhooks**: free, generous rate limits.
+
+## Roadmap ideas
+
+- Swap the weight system for a scikit-learn model trained on accumulated history.
+- Add a backtest module over historical candles before going live.
+- Add price candles + indicator overlays to the dashboard.
