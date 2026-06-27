@@ -25,10 +25,15 @@ def post_signal(sig: dict, signal_id: int):
         "color": color,
         "fields": [
             {"name": "Entry", "value": f"`{sig['entry']}`", "inline": True},
-            {"name": "Take Profit", "value": f"`{sig['tp']}`", "inline": True},
             {"name": "Stop Loss", "value": f"`{sig['sl']}`", "inline": True},
+            {"name": "Timeframe", "value": f"`{sig.get('timeframe','1h')}`", "inline": True},
+            {"name": "Take Profit 1", "value": f"`{sig.get('tp1', sig['tp'])}`", "inline": True},
+            {"name": "Take Profit 2", "value": f"`{sig.get('tp2','—')}`", "inline": True},
+            {"name": "Risk : Reward", "value": f"`1 : {sig.get('rr','—')}`", "inline": True},
+            {"name": "Confidence", "value": f"`{sig.get('confidence','—')}%`", "inline": True},
+            {"name": "Trend Strength", "value": f"`{sig.get('trend_strength','—')}/100`", "inline": True},
             {"name": "Score", "value": f"`{sig['score']}`", "inline": True},
-            {"name": "Signals", "value": contributors or "—", "inline": False},
+            {"name": "Reasons", "value": contributors or "—", "inline": False},
         ],
         "footer": {"text": "Auto-generated. Educational use only. Not financial advice."},
     }
