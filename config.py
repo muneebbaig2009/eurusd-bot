@@ -22,9 +22,20 @@ CANDLE_COUNT = 200
 # Combined weighted score must exceed this (absolute) to fire a signal.
 SIGNAL_THRESHOLD = 1.5
 
-# ATR multipliers for take-profit / stop-loss (volatility based)
-TP_ATR_MULT = 2.0
+# ATR multipliers for stop-loss (volatility based)
 SL_ATR_MULT = 1.5
+
+# Two take-profit targets: a near target (TP1) and a far target (TP2).
+# TP1 is set wider than SL so the primary target carries positive risk-reward.
+TP1_ATR_MULT = 2.25
+TP2_ATR_MULT = 3.5
+
+# Kept for backwards compatibility (TP1 is the primary target used for win/loss).
+TP_ATR_MULT = TP1_ATR_MULT
+
+# Confidence floor/ceiling so the % never reads as absolute certainty.
+CONF_MIN = 40
+CONF_MAX = 95
 
 # Timeframes that must agree for a signal to be valid (multi-tf confirmation)
 CONFIRM_TIMEFRAMES = ["1h", "1day"]
