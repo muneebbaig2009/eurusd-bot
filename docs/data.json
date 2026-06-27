@@ -1,5 +1,5 @@
 {
-  "updated_at": null,
+  "updated_at": "2026-06-27T15:50:27.565234+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -8,7 +8,13 @@
     "total": 0,
     "win_rate": 0.0
   },
-  "weights": {},
+  "weights": {
+    "bbands": 1.0,
+    "ema_trend": 1.0,
+    "ma_cross": 1.0,
+    "macd": 1.0,
+    "rsi": 1.0
+  },
   "equity": [],
   "signals": []
 }
