@@ -277,8 +277,9 @@ function render(d){
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>#</th><th>Time</th><th>Side</th><th>Entry</th><th>TP</th><th>SL</th>
-          <th>Score</th><th>Status</th><th>Closed</th><th>Signals</th>
+          <th>#</th><th>Time</th><th>Side</th><th>TF</th><th>Entry</th>
+          <th>SL</th><th>TP1</th><th>TP2</th><th>R:R</th><th>Conf</th><th>Trend</th>
+          <th>Status</th><th>Closed</th><th>Reasons</th>
         </tr></thead>
         <tbody>
           ${d.signals.map(sig=>`
@@ -286,10 +287,14 @@ function render(d){
               <td class="muted num">${sig.id}</td>
               <td class="muted">${timeAgo(sig.created_at)}</td>
               <td><span class="pill ${sig.direction}">${sig.direction}</span></td>
+              <td class="muted">${sig.timeframe||"—"}</td>
               <td class="num">${fmt(sig.entry)}</td>
-              <td class="num">${fmt(sig.tp)}</td>
               <td class="num">${fmt(sig.sl)}</td>
-              <td class="num muted">${sig.score}</td>
+              <td class="num">${sig.tp1?fmt(sig.tp1):fmt(sig.tp)}</td>
+              <td class="num">${sig.tp2?fmt(sig.tp2):"—"}</td>
+              <td class="num muted">${sig.rr?("1:"+sig.rr):"—"}</td>
+              <td class="num">${sig.confidence!=null?sig.confidence+"%":"—"}</td>
+              <td class="num muted">${sig.trend_strength!=null?sig.trend_strength:"—"}</td>
               <td><span class="pill ${sig.status}">${sig.status}</span></td>
               <td class="num muted">${sig.close_price?fmt(sig.close_price):"—"}</td>
               <td class="contrib">${contribHtml(sig.contributors)}</td>
