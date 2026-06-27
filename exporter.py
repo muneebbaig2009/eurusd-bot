@@ -14,7 +14,8 @@ def export():
     # All signals, newest first
     cur.execute("""
         SELECT id, created_at, direction, entry, tp, sl, score,
-               contributors, status, closed_at, close_price
+               contributors, status, closed_at, close_price,
+               tp1, tp2, confidence, rr, trend_strength, timeframe
         FROM signals ORDER BY id DESC
     """)
     signals = []
@@ -31,6 +32,12 @@ def export():
             "status": r["status"],
             "closed_at": r["closed_at"],
             "close_price": r["close_price"],
+            "tp1": r["tp1"],
+            "tp2": r["tp2"],
+            "confidence": r["confidence"],
+            "rr": r["rr"],
+            "trend_strength": r["trend_strength"],
+            "timeframe": r["timeframe"],
         })
 
     # Weights
