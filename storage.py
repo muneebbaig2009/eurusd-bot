@@ -24,15 +24,31 @@ def init_db():
             created_at TEXT NOT NULL,
             direction TEXT NOT NULL,      -- BUY / SELL
             entry REAL NOT NULL,
-            tp REAL NOT NULL,
+            tp REAL NOT NULL,             -- == tp1, used for win/loss
             sl REAL NOT NULL,
             score REAL NOT NULL,
             contributors TEXT NOT NULL,   -- JSON {technique: vote}
             status TEXT NOT NULL,         -- OPEN / WIN / LOSS
             closed_at TEXT,
-            close_price REAL
+            close_price REAL,
+            tp1 REAL,
+            tp2 REAL,
+            confidence INTEGER,
+            rr REAL,
+            trend_strength INTEGER,
+            timeframe TEXT
         )
     """)
+    con.commit()
+
+    # Migration: add new columns if upgrading an older database
+    existing = {row[1] for row in cur.execute("PRAGMA table_info(signals)").fetchall()}
+    for col, coltype in [
+        ("tp1", "REAL"), ("tp2", "REAL"), ("confidence", "INTEGER"),
+        ("rr", "REAL"), ("trend_strength", "INTEGER"), ("timeframe", "TEXT"),
+    ]:
+        if col not in existing:
+            cur.execute(f"ALTER TABLE signals ADD COLUMN {col} {coltype}")
     con.commit()
     con.close()
 
@@ -71,16 +87,21 @@ def all_weights() -> dict:
     return {t: w for t, w in rows}
 
 
-def log_signal(direction, entry, tp, sl, score, contributors) -> int:
+def log_signal(sig: dict) -> int:
+    """Insert a new OPEN signal from a signal dict produced by signal_engine."""
     con = _conn()
     cur = con.cursor()
     cur.execute(
-        "INSERT INTO signals(created_at, direction, entry, tp, sl, score, contributors, status) "
-        "VALUES(?,?,?,?,?,?,?, 'OPEN')",
+        "INSERT INTO signals("
+        "created_at, direction, entry, tp, sl, score, contributors, status, "
+        "tp1, tp2, confidence, rr, trend_strength, timeframe) "
+        "VALUES(?,?,?,?,?,?,?, 'OPEN', ?,?,?,?,?,?)",
         (
             datetime.now(timezone.utc).isoformat(),
-            direction, entry, tp, sl, score,
-            json.dumps(contributors),
+            sig["direction"], sig["entry"], sig["tp"], sig["sl"], sig["score"],
+            json.dumps(sig["contributors"]),
+            sig.get("tp1"), sig.get("tp2"), sig.get("confidence"),
+            sig.get("rr"), sig.get("trend_strength"), sig.get("timeframe"),
         ),
     )
     con.commit()
