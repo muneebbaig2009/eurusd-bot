@@ -53,12 +53,10 @@ def try_new_signal(timeframes):
     if sig is None:
         print("[signal] No valid signal this cycle.")
         return
-    sid = storage.log_signal(
-        sig["direction"], sig["entry"], sig["tp"], sig["sl"],
-        sig["score"], sig["contributors"],
-    )
+    sid = storage.log_signal(sig)
     discord_poster.post_signal(sig, sid)
-    print(f"[signal] Posted #{sid}: {sig['direction']} @ {sig['entry']}")
+    print(f"[signal] Posted #{sid}: {sig['direction']} @ {sig['entry']} "
+          f"(conf {sig['confidence']}%, R:R 1:{sig['rr']})")
 
 
 def main():
