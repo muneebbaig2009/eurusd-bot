@@ -60,6 +60,18 @@
     border-radius:3px;
   }
   .updated{font-size:12px;color:var(--muted)}
+  .pair-select{
+    background:var(--panel);
+    color:var(--ink);
+    font-family:var(--mono);
+    font-size:13px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:5px 10px;
+    cursor:pointer;
+    outline:none;
+  }
+  .pair-select:hover{border-color:var(--accent)}
   .dot{
     display:inline-block;width:7px;height:7px;border-radius:50%;
     background:var(--accent);margin-right:6px;
@@ -154,8 +166,12 @@
 <body>
   <header>
     <div class="brand">
-      <div class="pair">EUR<span class="slash">/</span>USD</div>
+      <div class="pair" id="pairTitle">EUR<span class="slash">/</span>USD</div>
       <span class="tag">Signal Monitor</span>
+      <select id="pairSelect" class="pair-select">
+        <option value="eurusd">EUR/USD</option>
+        <option value="gbpusd">GBP/USD</option>
+      </select>
     </div>
     <div class="updated"><span class="dot"></span><span id="updated">loading…</span></div>
   </header>
@@ -310,14 +326,29 @@ function render(d){
   if(cv){ drawEquity(cv, d.equity); window.addEventListener("resize", ()=>drawEquity(cv,d.equity)); }
 }
 
-fetch("data.json?_=" + Date.now())
-  .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
-  .then(render)
-  .catch(e=>{
-    document.getElementById("updated").textContent = "no data yet";
-    document.getElementById("root").innerHTML =
-      `<div class="err">No <code>data.json</code> found yet.<br>It appears after the bot runs once and commits its results.</div>`;
-  });
+function pairLabel(slug){
+  return slug.slice(0,3).toUpperCase() + "/" + slug.slice(3).toUpperCase();
+}
+
+function loadPair(slug){
+  // update the big title (e.g. GBP/USD)
+  const lbl = pairLabel(slug);
+  document.getElementById("pairTitle").innerHTML =
+    lbl.slice(0,3) + '<span class="slash">/</span>' + lbl.slice(4);
+
+  fetch(`data_${slug}.json?_=` + Date.now())
+    .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(render)
+    .catch(e=>{
+      document.getElementById("updated").textContent = "no data yet";
+      document.getElementById("root").innerHTML =
+        `<div class="err">No data for ${lbl} yet.<br>It appears after the bot runs once for this pair and commits its results.</div>`;
+    });
+}
+
+const sel = document.getElementById("pairSelect");
+sel.addEventListener("change", () => loadPair(sel.value));
+loadPair(sel.value);  // initial load (EUR/USD)
 </script>
 </body>
 </html>
