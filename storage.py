@@ -1,16 +1,20 @@
-"""SQLite persistence: technique weights + signal log (for learning + results)."""
+"""SQLite persistence: per-pair technique weights + signal log.
+
+Every function takes a `db` path so each currency pair keeps its own
+independent database (signals_eurusd.db, signals_gbpusd.db, ...).
+"""
 import sqlite3
 import json
 from datetime import datetime, timezone
 import config
 
 
-def _conn():
-    return sqlite3.connect(config.DB_PATH)
+def _conn(db):
+    return sqlite3.connect(db)
 
 
-def init_db():
-    con = _conn()
+def init_db(db):
+    con = _conn(db)
     cur = con.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS weights (
@@ -22,13 +26,13 @@ def init_db():
         CREATE TABLE IF NOT EXISTS signals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             created_at TEXT NOT NULL,
-            direction TEXT NOT NULL,      -- BUY / SELL
+            direction TEXT NOT NULL,
             entry REAL NOT NULL,
-            tp REAL NOT NULL,             -- == tp1, used for win/loss
+            tp REAL NOT NULL,
             sl REAL NOT NULL,
             score REAL NOT NULL,
-            contributors TEXT NOT NULL,   -- JSON {technique: vote}
-            status TEXT NOT NULL,         -- OPEN / WIN / LOSS
+            contributors TEXT NOT NULL,
+            status TEXT NOT NULL,
             closed_at TEXT,
             close_price REAL,
             tp1 REAL,
@@ -40,8 +44,7 @@ def init_db():
         )
     """)
     con.commit()
-
-    # Migration: add new columns if upgrading an older database
+    # Migration for older databases
     existing = {row[1] for row in cur.execute("PRAGMA table_info(signals)").fetchall()}
     for col, coltype in [
         ("tp1", "REAL"), ("tp2", "REAL"), ("confidence", "INTEGER"),
@@ -53,21 +56,21 @@ def init_db():
     con.close()
 
 
-def get_weight(technique: str) -> float:
-    con = _conn()
+def get_weight(db, technique: str) -> float:
+    con = _conn(db)
     cur = con.cursor()
     cur.execute("SELECT weight FROM weights WHERE technique = ?", (technique,))
     row = cur.fetchone()
     con.close()
     if row is None:
-        set_weight(technique, config.DEFAULT_WEIGHT)
+        set_weight(db, technique, config.DEFAULT_WEIGHT)
         return config.DEFAULT_WEIGHT
     return row[0]
 
 
-def set_weight(technique: str, weight: float):
+def set_weight(db, technique: str, weight: float):
     weight = max(config.MIN_WEIGHT, min(config.MAX_WEIGHT, weight))
-    con = _conn()
+    con = _conn(db)
     cur = con.cursor()
     cur.execute(
         "INSERT INTO weights(technique, weight) VALUES(?, ?) "
@@ -78,8 +81,8 @@ def set_weight(technique: str, weight: float):
     con.close()
 
 
-def all_weights() -> dict:
-    con = _conn()
+def all_weights(db) -> dict:
+    con = _conn(db)
     cur = con.cursor()
     cur.execute("SELECT technique, weight FROM weights")
     rows = cur.fetchall()
@@ -87,9 +90,8 @@ def all_weights() -> dict:
     return {t: w for t, w in rows}
 
 
-def log_signal(sig: dict) -> int:
-    """Insert a new OPEN signal from a signal dict produced by signal_engine."""
-    con = _conn()
+def log_signal(db, sig: dict) -> int:
+    con = _conn(db)
     cur = con.cursor()
     cur.execute(
         "INSERT INTO signals("
@@ -110,21 +112,22 @@ def log_signal(sig: dict) -> int:
     return sid
 
 
-def open_signals() -> list:
-    con = _conn()
+def open_signals(db) -> list:
+    con = _conn(db)
     cur = con.cursor()
-    cur.execute("SELECT id, direction, entry, tp, sl, contributors FROM signals WHERE status='OPEN'")
+    cur.execute("SELECT id, direction, entry, tp, sl, contributors, created_at "
+                "FROM signals WHERE status='OPEN'")
     rows = cur.fetchall()
     con.close()
     return [
         {"id": r[0], "direction": r[1], "entry": r[2], "tp": r[3],
-         "sl": r[4], "contributors": json.loads(r[5])}
+         "sl": r[4], "contributors": json.loads(r[5]), "created_at": r[6]}
         for r in rows
     ]
 
 
-def close_signal(signal_id, status, close_price):
-    con = _conn()
+def close_signal(db, signal_id, status, close_price):
+    con = _conn(db)
     cur = con.cursor()
     cur.execute(
         "UPDATE signals SET status=?, closed_at=?, close_price=? WHERE id=?",
@@ -134,9 +137,8 @@ def close_signal(signal_id, status, close_price):
     con.close()
 
 
-def has_open_signal() -> bool:
-    """Avoid spamming overlapping signals while one is still live."""
-    con = _conn()
+def has_open_signal(db) -> bool:
+    con = _conn(db)
     cur = con.cursor()
     cur.execute("SELECT COUNT(*) FROM signals WHERE status='OPEN'")
     n = cur.fetchone()[0]
@@ -144,8 +146,8 @@ def has_open_signal() -> bool:
     return n > 0
 
 
-def stats() -> dict:
-    con = _conn()
+def stats(db) -> dict:
+    con = _conn(db)
     cur = con.cursor()
     cur.execute("SELECT status, COUNT(*) FROM signals GROUP BY status")
     rows = dict(cur.fetchall())
