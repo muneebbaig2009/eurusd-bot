@@ -4,7 +4,7 @@ import config
 import storage
 
 
-def update_weights(contributors: dict, direction: str, won: bool):
+def update_weights(db, contributors: dict, direction: str, won: bool):
     """
     contributors: {technique: vote} captured when the signal fired.
     direction: BUY or SELL.
@@ -18,7 +18,7 @@ def update_weights(contributors: dict, direction: str, won: bool):
         if vote == 0:
             continue
         agreed = (vote == dir_sign)
-        w = storage.get_weight(tech)
+        w = storage.get_weight(db, tech)
         if won and agreed:
             w += config.LEARN_RATE
         elif won and not agreed:
@@ -27,4 +27,4 @@ def update_weights(contributors: dict, direction: str, won: bool):
             w -= config.LEARN_RATE
         elif (not won) and not agreed:
             w += config.LEARN_RATE
-        storage.set_weight(tech, w)
+        storage.set_weight(db, tech, w)
