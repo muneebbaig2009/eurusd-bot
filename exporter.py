@@ -6,8 +6,9 @@ from datetime import datetime, timezone
 import config
 
 
-def export():
-    con = sqlite3.connect(config.DB_PATH)
+def export(symbol):
+    db = config.db_path(symbol)
+    con = sqlite3.connect(db)
     con.row_factory = sqlite3.Row
     cur = con.cursor()
 
@@ -67,7 +68,7 @@ def export():
 
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
-        "symbol": config.SYMBOL,
+        "symbol": symbol,
         "stats": {
             "wins": wins,
             "losses": losses,
@@ -80,10 +81,12 @@ def export():
         "signals": signals,
     }
 
-    with open("docs/data.json", "w") as f:
+    out_path = config.data_json_path(symbol)
+    with open(out_path, "w") as f:
         json.dump(payload, f, indent=2)
-    print("[export] docs/data.json written")
+    print(f"[export] {out_path} written")
 
 
 if __name__ == "__main__":
-    export()
+    for sym in config.PAIRS:
+        export(sym)
