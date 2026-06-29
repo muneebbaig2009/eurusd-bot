@@ -15,13 +15,13 @@ def _send(embed: dict):
     resp.raise_for_status()
 
 
-def post_signal(sig: dict, signal_id: int):
+def post_signal(sig: dict, signal_id: int, symbol: str = 'EUR/USD'):
     color = 0x2ecc71 if sig["direction"] == "BUY" else 0xe74c3c
     contributors = ", ".join(
         f"{t}({'+' if v > 0 else ''}{v})" for t, v in sig["contributors"].items() if v != 0
     )
     embed = {
-        "title": f"📈 {sig['direction']} EUR/USD  (#{signal_id})",
+        "title": f"📈 {sig['direction']} {symbol}  (#{signal_id})",
         "color": color,
         "fields": [
             {"name": "Entry", "value": f"`{sig['entry']}`", "inline": True},
@@ -41,12 +41,12 @@ def post_signal(sig: dict, signal_id: int):
 
 
 def post_result(signal_id: int, direction: str, status: str,
-                entry: float, close_price: float, stats: dict):
+                entry: float, close_price: float, stats: dict, symbol: str = 'EUR/USD'):
     won = status == "WIN"
     color = 0x2ecc71 if won else 0xe74c3c
     emoji = "✅" if won else "❌"
     embed = {
-        "title": f"{emoji} {status} — {direction} EUR/USD (#{signal_id})",
+        "title": f"{emoji} {status} — {direction} {symbol} (#{signal_id})",
         "color": color,
         "fields": [
             {"name": "Entry", "value": f"`{entry}`", "inline": True},
