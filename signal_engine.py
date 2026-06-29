@@ -10,12 +10,12 @@ import storage
 from techniques import get_votes, TECHNIQUES
 
 
-def score_timeframe(df) -> tuple:
+def score_timeframe(db, df) -> tuple:
     """Return (weighted_score, {technique: vote}) for one timeframe."""
     votes = get_votes(df)
     score = 0.0
     for tech, vote in votes.items():
-        weight = storage.get_weight(tech)
+        weight = storage.get_weight(db, tech)
         score += weight * vote
     return score, votes
 
@@ -37,10 +37,10 @@ def trend_strength(df) -> int:
     return int(max(0, min(100, round(val))))
 
 
-def confidence_pct(primary_score) -> int:
+def confidence_pct(db, primary_score) -> int:
     """Map the weighted score to a readable confidence %, normalised against
     the current sum of technique weights so it adapts as weights learn."""
-    total_weight = sum(storage.get_weight(t) for t in TECHNIQUES)
+    total_weight = sum(storage.get_weight(db, t) for t in TECHNIQUES)
     if total_weight <= 0:
         return config.CONF_MIN
     # ratio of how much of the available weight pointed one way
@@ -49,14 +49,14 @@ def confidence_pct(primary_score) -> int:
     return int(round(config.CONF_MIN + ratio * span))
 
 
-def generate_signal(timeframes: dict):
+def generate_signal(db, timeframes: dict):
     """timeframes: {tf_name: DataFrame}. Returns a rich signal dict or None."""
     tf_scores = {}
     tf_votes = {}
     for tf in config.CONFIRM_TIMEFRAMES:
         if tf not in timeframes:
             return None
-        s, v = score_timeframe(timeframes[tf])
+        s, v = score_timeframe(db, timeframes[tf])
         tf_scores[tf] = s
         tf_votes[tf] = v
 
@@ -97,7 +97,7 @@ def generate_signal(timeframes: dict):
         "tp1": round(tp1, 5),
         "tp2": round(tp2, 5),
         "score": round(primary_score, 3),
-        "confidence": confidence_pct(primary_score),
+        "confidence": confidence_pct(db, primary_score),
         "rr": rr,
         "trend_strength": trend_strength(primary_df),
         "timeframe": config.PRIMARY_TF,
