@@ -1,14 +1,15 @@
-"""Pull EURUSD OHLC candles from Twelve Data and resample 3h from 1h."""
+"""Pull OHLC candles from Twelve Data for a given pair, resample 3h from 1h."""
 import requests
 import pandas as pd
 import config
 
 
-def fetch_candles(interval: str, outputsize: int = config.CANDLE_COUNT) -> pd.DataFrame:
-    """Fetch OHLC candles for a given interval. Returns a DataFrame sorted oldest->newest."""
+def fetch_candles(symbol: str, interval: str,
+                  outputsize: int = config.CANDLE_COUNT) -> pd.DataFrame:
+    """Fetch OHLC candles for a symbol+interval. Sorted oldest->newest."""
     url = "https://api.twelvedata.com/time_series"
     params = {
-        "symbol": config.SYMBOL,
+        "symbol": symbol,
         "interval": interval,
         "outputsize": outputsize,
         "apikey": config.TWELVE_DATA_API_KEY,
@@ -19,11 +20,11 @@ def fetch_candles(interval: str, outputsize: int = config.CANDLE_COUNT) -> pd.Da
     data = resp.json()
 
     if data.get("status") == "error":
-        raise RuntimeError(f"Twelve Data error ({interval}): {data.get('message')}")
+        raise RuntimeError(f"Twelve Data error ({symbol} {interval}): {data.get('message')}")
 
     values = data.get("values", [])
     if not values:
-        raise RuntimeError(f"No candle data returned for {interval}")
+        raise RuntimeError(f"No candle data returned for {symbol} {interval}")
 
     df = pd.DataFrame(values)
     df["datetime"] = pd.to_datetime(df["datetime"])
@@ -35,16 +36,14 @@ def fetch_candles(interval: str, outputsize: int = config.CANDLE_COUNT) -> pd.Da
 
 
 def resample_3h(df_1h: pd.DataFrame) -> pd.DataFrame:
-    """Build 3-hour candles from 1-hour candles."""
     agg = {"open": "first", "high": "max", "low": "min", "close": "last"}
-    df_3h = df_1h.resample("3h").agg(agg).dropna()
-    return df_3h
+    return df_1h.resample("3h").agg(agg).dropna()
 
 
-def get_all_timeframes() -> dict:
-    """Return {tf_name: DataFrame} for 5min, 1h, 3h, 1day."""
+def get_all_timeframes(symbol: str) -> dict:
+    """Return {tf_name: DataFrame} for 5min, 1h, 3h, 1day for one pair."""
     out = {}
     for name, interval in config.TIMEFRAMES.items():
-        out[name] = fetch_candles(interval)
+        out[name] = fetch_candles(symbol, interval)
     out["3h"] = resample_3h(out["1h"])
     return out
