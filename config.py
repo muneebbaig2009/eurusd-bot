@@ -1,12 +1,35 @@
 """Central configuration. All secrets come from environment variables."""
 import os
+import re
 
 # --- Secrets (set these as environment variables / GitHub Secrets) ---
 TWELVE_DATA_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
-# --- Trading instrument ---
-SYMBOL = "EUR/USD"
+# --- Trading instruments ---
+# Each pair runs independently: its own database, its own dashboard JSON,
+# and its own self-learning technique weights.
+PAIRS = ["EUR/USD", "GBP/USD"]
+
+# Backwards-compatible single symbol (first pair). Most code now takes a `symbol`
+# argument explicitly; this is only a default.
+SYMBOL = PAIRS[0]
+
+
+def slug(symbol: str) -> str:
+    """Turn 'EUR/USD' into 'eurusd' for filenames."""
+    return re.sub(r"[^a-z0-9]", "", symbol.lower())
+
+
+def db_path(symbol: str) -> str:
+    """Per-pair SQLite file, e.g. signals_eurusd.db."""
+    return f"signals_{slug(symbol)}.db"
+
+
+def data_json_path(symbol: str) -> str:
+    """Per-pair dashboard JSON, e.g. docs/data_eurusd.json."""
+    return f"docs/data_{slug(symbol)}.json"
+
 
 # Timeframes we pull from Twelve Data. (3h is resampled from 1h separately.)
 TIMEFRAMES = {
@@ -51,6 +74,3 @@ LEARN_RATE = 0.05
 # Keep weights inside this band so nothing dominates or dies completely
 MIN_WEIGHT = 0.2
 MAX_WEIGHT = 3.0
-
-# --- Storage ---
-DB_PATH = os.environ.get("DB_PATH", "signals.db")
