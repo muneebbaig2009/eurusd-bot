@@ -1,11 +1,13 @@
-"""Offline test: generate synthetic candles, run the full pipeline, no API/Discord needed."""
+"""Offline test: synthetic candles through the full multi-pair pipeline."""
+import os
 import numpy as np
 import pandas as pd
 import config
-config.DB_PATH = "test.db"  # isolate test DB
 
 import storage, signal_engine, learner
 from techniques import get_votes
+
+TEST_DB = "test.db"
 
 
 def make_candles(n=250, trend=0.0001, seed=1):
@@ -20,10 +22,9 @@ def make_candles(n=250, trend=0.0001, seed=1):
 
 
 def main():
-    import os
-    if os.path.exists("test.db"):
-        os.remove("test.db")
-    storage.init_db()
+    if os.path.exists(TEST_DB):
+        os.remove(TEST_DB)
+    storage.init_db(TEST_DB)
 
     df = make_candles()
     print("Votes:", get_votes(df))
@@ -35,22 +36,20 @@ def main():
         "1day": make_candles(trend=0.0002, seed=4),
     }
 
-    sig = signal_engine.generate_signal(timeframes)
+    sig = signal_engine.generate_signal(TEST_DB, timeframes)
     print("Signal:", sig)
 
     if sig:
-        sid = storage.log_signal(sig["direction"], sig["entry"], sig["tp"],
-                                 sig["sl"], sig["score"], sig["contributors"])
-        print("Logged signal id:", sid)
-        print("Weights before:", storage.all_weights())
-        # Simulate a WIN
-        storage.close_signal(sid, "WIN", sig["tp"])
-        learner.update_weights(sig["contributors"], sig["direction"], won=True)
-        print("Weights after WIN:", storage.all_weights())
-        print("Stats:", storage.stats())
+        sid = storage.log_signal(TEST_DB, sig)
+        print("Logged id:", sid, "| weights before:", storage.all_weights(TEST_DB))
+        storage.close_signal(TEST_DB, sid, "WIN", sig["tp"])
+        learner.update_weights(TEST_DB, sig["contributors"], sig["direction"], won=True)
+        print("Weights after WIN:", storage.all_weights(TEST_DB))
+        print("Stats:", storage.stats(TEST_DB))
 
     print("\nAll modules executed successfully.")
-    os.remove("test.db")
+    if os.path.exists(TEST_DB):
+        os.remove(TEST_DB)
 
 
 if __name__ == "__main__":
