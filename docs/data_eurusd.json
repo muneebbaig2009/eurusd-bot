@@ -1,18 +1,18 @@
 {
-  "updated_at": "2026-07-01T18:15:54.017969+00:00",
+  "updated_at": "2026-07-01T18:31:10.765419+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
-    "losses": 10,
-    "open": 1,
+    "losses": 11,
+    "open": 0,
     "total": 11,
     "win_rate": 0.0
   },
   "weights": {
     "bbands": 1.1,
-    "ema_trend": 0.4999999999999996,
-    "ma_cross": 0.4999999999999996,
-    "macd": 0.5999999999999996,
+    "ema_trend": 0.4499999999999996,
+    "ma_cross": 0.4499999999999996,
+    "macd": 0.5499999999999996,
     "rsi": 1.0
   },
   "equity": [
@@ -25,7 +25,8 @@
     -7,
     -8,
     -9,
-    -10
+    -10,
+    -11
   ],
   "signals": [
     {
@@ -43,9 +44,9 @@
         "bbands": 0,
         "ema_trend": -1
       },
-      "status": "OPEN",
-      "closed_at": null,
-      "close_price": null,
+      "status": "LOSS",
+      "closed_at": "2026-07-01T18:31:10.411524+00:00",
+      "close_price": 1.13985,
       "tp1": 1.13484,
       "tp2": 1.13317,
       "confidence": 64,
