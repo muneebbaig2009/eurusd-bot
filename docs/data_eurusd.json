@@ -1,19 +1,19 @@
 {
-  "updated_at": "2026-07-02T13:01:04.137426+00:00",
+  "updated_at": "2026-07-02T13:15:42.189214+00:00",
   "symbol": "EUR/USD",
   "stats": {
-    "wins": 1,
+    "wins": 2,
     "losses": 11,
     "open": 1,
-    "total": 13,
-    "win_rate": 8.3
+    "total": 14,
+    "win_rate": 15.4
   },
   "weights": {
-    "bbands": 1.1500000000000001,
-    "ema_trend": 0.39999999999999963,
-    "ma_cross": 0.4999999999999996,
-    "macd": 0.4999999999999996,
-    "rsi": 1.05
+    "bbands": 1.2000000000000002,
+    "ema_trend": 0.34999999999999964,
+    "ma_cross": 0.5499999999999996,
+    "macd": 0.4499999999999996,
+    "rsi": 1.1
   },
   "equity": [
     -1,
@@ -27,9 +27,35 @@
     -9,
     -10,
     -11,
-    -10
+    -10,
+    -9
   ],
   "signals": [
+    {
+      "id": 14,
+      "created_at": "2026-07-02T13:15:41.979849+00:00",
+      "direction": "SELL",
+      "entry": 1.14515,
+      "tp": 1.14163,
+      "sl": 1.1475,
+      "score": -2.05,
+      "contributors": {
+        "rsi": -1,
+        "ma_cross": -1,
+        "macd": 1,
+        "bbands": -1,
+        "ema_trend": 1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.14163,
+      "tp2": 1.13967,
+      "confidence": 71,
+      "rr": 1.5,
+      "trend_strength": 29,
+      "timeframe": "1h"
+    },
     {
       "id": 13,
       "created_at": "2026-07-02T13:01:03.652402+00:00",
@@ -45,9 +71,9 @@
         "bbands": -1,
         "ema_trend": 1
       },
-      "status": "OPEN",
-      "closed_at": null,
-      "close_price": null,
+      "status": "WIN",
+      "closed_at": "2026-07-02T13:15:41.676612+00:00",
+      "close_price": 1.14145,
       "tp1": 1.14145,
       "tp2": 1.13946,
       "confidence": 68,
