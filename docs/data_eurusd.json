@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-02T13:30:54.829294+00:00",
+  "updated_at": "2026-07-02T13:45:44.024490+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 3,
     "losses": 11,
-    "open": 0,
-    "total": 14,
+    "open": 1,
+    "total": 15,
     "win_rate": 21.4
   },
   "weights": {
@@ -32,6 +32,31 @@
     -8
   ],
   "signals": [
+    {
+      "id": 15,
+      "created_at": "2026-07-02T13:45:43.841127+00:00",
+      "direction": "SELL",
+      "entry": 1.14483,
+      "tp": 1.14124,
+      "sl": 1.14723,
+      "score": -2.3,
+      "contributors": {
+        "rsi": -1,
+        "ma_cross": -1,
+        "macd": 1,
+        "bbands": -1,
+        "ema_trend": 1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.14124,
+      "tp2": 1.13924,
+      "confidence": 74,
+      "rr": 1.5,
+      "trend_strength": 29,
+      "timeframe": "1h"
+    },
     {
       "id": 14,
       "created_at": "2026-07-02T13:15:41.979849+00:00",
