@@ -58,18 +58,23 @@ def export(symbol):
     by_status = {row["status"]: row["c"] for row in cur.fetchall()}
     wins = by_status.get("WIN", 0)
     losses = by_status.get("LOSS", 0)
-    closed = wins + losses
+    breakevens = by_status.get("BREAKEVEN", 0)
+    closed = wins + losses + breakevens
     win_rate = round(wins / closed * 100, 1) if closed else 0.0
 
-    # Win/loss equity curve (+1 per win, -1 per loss)
+    # Equity curve: +1 win / -1 loss / 0 breakeven, cumulative
     cur.execute("""
         SELECT status FROM signals
-        WHERE status IN ('WIN','LOSS') ORDER BY id ASC
+        WHERE status IN ('WIN','LOSS','BREAKEVEN') ORDER BY id ASC
     """)
     equity = []
     running = 0
     for row in cur.fetchall():
-        running += 1 if row["status"] == "WIN" else -1
+        if row["status"] == "WIN":
+            running += 1
+        elif row["status"] == "LOSS":
+            running -= 1
+        # BREAKEVEN: no change
         equity.append(running)
 
     con.close()
@@ -83,7 +88,8 @@ def export(symbol):
         "stats": {
             "wins": wins,
             "losses": losses,
-            "open": by_status.get("OPEN", 0),
+            "breakevens": breakevens,
+            "open": by_status.get("OPEN", 0) + by_status.get("TP1_HIT", 0),
             "total": len(signals),
             "win_rate": win_rate,
         },

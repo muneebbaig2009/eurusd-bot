@@ -60,6 +60,7 @@ def init_db(db):
     for col, coltype in [
         ("tp1", "REAL"), ("tp2", "REAL"), ("confidence", "INTEGER"),
         ("rr", "REAL"), ("trend_strength", "INTEGER"), ("timeframe", "TEXT"),
+        ("tp1_hit_at", "TEXT"),
     ]:
         if col not in existing:
             cur.execute(f"ALTER TABLE signals ADD COLUMN {col} {coltype}")
@@ -71,13 +72,14 @@ def init_db(db):
 def _calc_demo_pnl(status: str, entry: float, sl: float, close_price: float) -> float:
     """P&L based on actual pip movement vs SL distance, scaled to fixed risk.
 
-    Risk is always DEMO_RISK_PER_TRADE dollars (the SL distance = 1R).
-    WIN: profit = risk × |close − entry| / |entry − sl|  (exact TP pip value)
-    LOSS: loss  = −risk × |close − entry| / |entry − sl| (usually exactly −risk)
+    BREAKEVEN: price returned to entry after TP1 — always $0.
+    WIN:  profit = risk × |close − entry| / |entry − sl|  (TP pip value)
+    LOSS: loss   = −risk × |close − entry| / |entry − sl| (usually exactly −risk)
     """
+    if status == "BREAKEVEN":
+        return 0.0
     sl_dist = abs(entry - sl)
     if sl_dist <= 0:
-        # Fallback: flat risk amount
         return config.DEMO_RISK_PER_TRADE if status == "WIN" else -config.DEMO_RISK_PER_TRADE
     price_move = abs(close_price - entry)
     raw = config.DEMO_RISK_PER_TRADE * (price_move / sl_dist)
@@ -91,7 +93,7 @@ def _backfill_demo(db):
     cur.execute("""
         SELECT s.id, s.direction, s.status, s.entry, s.sl, s.close_price, s.closed_at
         FROM signals s
-        WHERE s.status IN ('WIN','LOSS')
+        WHERE s.status IN ('WIN','LOSS','BREAKEVEN')
           AND s.id NOT IN (SELECT signal_id FROM demo_account)
         ORDER BY s.id ASC
     """)
@@ -219,16 +221,31 @@ def log_signal(db, sig: dict) -> int:
 def open_signals(db) -> list:
     con = _conn(db)
     cur = con.cursor()
-    cur.execute("SELECT id, direction, entry, tp, sl, contributors, created_at, rr "
-                "FROM signals WHERE status='OPEN'")
+    cur.execute(
+        "SELECT id, direction, entry, tp, sl, contributors, created_at, rr, "
+        "tp2, tp1_hit_at, status "
+        "FROM signals WHERE status IN ('OPEN','TP1_HIT')"
+    )
     rows = cur.fetchall()
     con.close()
     return [
         {"id": r[0], "direction": r[1], "entry": r[2], "tp": r[3],
          "sl": r[4], "contributors": json.loads(r[5]), "created_at": r[6],
-         "rr": r[7]}
+         "rr": r[7], "tp2": r[8], "tp1_hit_at": r[9], "status": r[10]}
         for r in rows
     ]
+
+
+def set_tp1_hit(db, signal_id: int):
+    """Transition signal to TP1_HIT: TP1 reached, SL moves to entry, targeting TP2."""
+    con = _conn(db)
+    cur = con.cursor()
+    cur.execute(
+        "UPDATE signals SET status='TP1_HIT', tp1_hit_at=? WHERE id=?",
+        (datetime.now(timezone.utc).isoformat(), signal_id),
+    )
+    con.commit()
+    con.close()
 
 
 def close_signal(db, signal_id, status, close_price):
@@ -245,7 +262,7 @@ def close_signal(db, signal_id, status, close_price):
 def has_open_signal(db) -> bool:
     con = _conn(db)
     cur = con.cursor()
-    cur.execute("SELECT COUNT(*) FROM signals WHERE status='OPEN'")
+    cur.execute("SELECT COUNT(*) FROM signals WHERE status IN ('OPEN','TP1_HIT')")
     n = cur.fetchone()[0]
     con.close()
     return n > 0
@@ -256,7 +273,7 @@ def last_close_time(db):
     con = _conn(db)
     cur = con.cursor()
     cur.execute(
-        "SELECT closed_at FROM signals WHERE status IN ('WIN','LOSS') "
+        "SELECT closed_at FROM signals WHERE status IN ('WIN','LOSS','BREAKEVEN') "
         "ORDER BY closed_at DESC LIMIT 1"
     )
     row = cur.fetchone()
@@ -277,7 +294,11 @@ def stats(db) -> dict:
     con.close()
     wins = rows.get("WIN", 0)
     losses = rows.get("LOSS", 0)
-    total_closed = wins + losses
+    breakevens = rows.get("BREAKEVEN", 0)
+    total_closed = wins + losses + breakevens
     win_rate = (wins / total_closed * 100) if total_closed else 0.0
-    return {"wins": wins, "losses": losses, "open": rows.get("OPEN", 0),
-            "win_rate": round(win_rate, 1)}
+    return {
+        "wins": wins, "losses": losses, "breakevens": breakevens,
+        "open": rows.get("OPEN", 0) + rows.get("TP1_HIT", 0),
+        "win_rate": round(win_rate, 1),
+    }

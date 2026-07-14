@@ -72,37 +72,72 @@ def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
     _send(embed)
 
 
+def post_tp1_hit(signal_id: int, direction: str, entry: float, tp2: float,
+                 symbol: str = "EUR/USD"):
+    """Mid-trade alert: TP1 reached, SL moved to entry, now targeting TP2."""
+    embed = {
+        "title": f"🎯 TP1 HIT — {direction} {symbol}  (#{signal_id})",
+        "color": 0xffa500,
+        "description": (
+            "**TP1 was reached!** Stop loss has been moved to **entry (breakeven)**.\n"
+            "The trade is now **risk-free** and is targeting **TP2**.\n\n"
+            f"> Update your broker SL to `{entry}` now."
+        ),
+        "fields": [
+            {"name": "New Stop Loss", "value": f"`{entry}`  *(breakeven)*", "inline": True},
+            {"name": "New Target",    "value": f"`{tp2 or '—'}`",           "inline": True},
+            {"name": "Worst Case",    "value": "`Breakeven  ($0.00)`",      "inline": True},
+        ],
+        "footer": {"text": "Auto-generated · Educational use only · Not financial advice"},
+    }
+    _send(embed)
+
+
 def post_result(signal_id: int, direction: str, status: str,
                 entry: float, close_price: float, stats: dict,
                 symbol: str = "EUR/USD",
                 pnl: float = None, new_balance: float = None):
-    """Posted when a signal closes WIN or LOSS. Shows P&L and updated balance."""
-    won   = status == "WIN"
-    color = 0x3fb950 if won else 0xf85149
-    emoji = "✅" if won else "❌"
+    """Posted when a signal closes (WIN / LOSS / BREAKEVEN). Shows P&L and updated balance."""
+    if status == "WIN":
+        color, emoji = 0x3fb950, "✅"
+    elif status == "BREAKEVEN":
+        color, emoji = 0xffa500, "↩️"
+    else:
+        color, emoji = 0xf85149, "❌"
 
     # P&L line
     if pnl is not None:
-        pnl_sign  = "+" if pnl >= 0 else ""
-        pnl_str   = f"{pnl_sign}${abs(pnl):.2f}"
-        pnl_emoji = "💰" if pnl >= 0 else "💸"
+        if pnl == 0:
+            pnl_str, pnl_emoji = "$0.00  *(breakeven)*", "🔄"
+        elif pnl > 0:
+            pnl_str, pnl_emoji = f"+${pnl:.2f}", "💰"
+        else:
+            pnl_str, pnl_emoji = f"-${abs(pnl):.2f}", "💸"
     else:
-        pnl_str   = "—"
-        pnl_emoji = "💰"
+        pnl_str, pnl_emoji = "—", "💰"
 
     # Balance line
     if new_balance is not None:
-        initial      = config.DEMO_INITIAL_BALANCE
-        total_pnl    = round(new_balance - initial, 2)
-        return_pct   = round((new_balance / initial - 1) * 100, 1)
-        ret_sign     = "+" if return_pct >= 0 else ""
-        bal_str      = (
+        initial    = config.DEMO_INITIAL_BALANCE
+        total_pnl  = round(new_balance - initial, 2)
+        return_pct = round((new_balance / initial - 1) * 100, 1)
+        ret_sign   = "+" if return_pct >= 0 else ""
+        bal_str    = (
             f"**${new_balance:.2f}**  "
             f"({ret_sign}{return_pct:.1f}% overall  ·  "
             f"total P&L {'+' if total_pnl >= 0 else ''}${total_pnl:.2f})"
         )
     else:
         bal_str = "—"
+
+    # Record line
+    wins, losses = stats["wins"], stats["losses"]
+    bes = stats.get("breakevens", 0)
+    be_part = f"  ·  BE **{bes}**" if bes else ""
+    record_str = (
+        f"W **{wins}**  ·  L **{losses}**{be_part}"
+        f"  ·  Win rate **{stats['win_rate']}%**"
+    )
 
     embed = {
         "title": f"{emoji} {status} — {direction} {symbol}  (#{signal_id})",
@@ -118,8 +153,7 @@ def post_result(signal_id: int, direction: str, status: str,
              "value": bal_str,
              "inline": False},
             {"name": "Overall Record",
-             "value": (f"W **{stats['wins']}**  ·  L **{stats['losses']}**  "
-                       f"·  Win rate **{stats['win_rate']}%**"),
+             "value": record_str,
              "inline": False},
         ],
         "footer": {"text": "Auto-generated · Educational use only · Not financial advice"},

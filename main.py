@@ -38,35 +38,73 @@ def _candles_since(df5, created_at):
 
 
 def check_open_signals(symbol, db, timeframes):
-    """Scan every 5min candle since each signal opened for a TP or SL touch."""
+    """Scan 5min candles for each open signal.
+
+    Phase 1 (OPEN):    watch original SL and TP1.
+    Phase 2 (TP1_HIT): TP1 already touched → watch entry (breakeven SL) and TP2.
+    Outcomes: WIN | LOSS | BREAKEVEN | TP1_HIT (transition)
+    """
     df5_full = timeframes["5min"]
     last_price = float(df5_full["close"].iloc[-1])
 
     for s in storage.open_signals(db):
-        window = _candles_since(df5_full, s.get("created_at"))
+        # Use tp1_hit_at as Phase 2 window start; fall back to created_at for Phase 1
+        if s["status"] == "TP1_HIT":
+            start_ts = s.get("tp1_hit_at") or s.get("created_at")
+        else:
+            start_ts = s.get("created_at")
+
+        window = _candles_since(df5_full, start_ts)
         if window.empty:
             window = df5_full.tail(1)
 
         hit = None
         close_price = last_price
 
-        # Walk candles in order; the FIRST level touched decides the outcome.
         for _, row in window.iterrows():
             hi, lo = float(row["high"]), float(row["low"])
-            if s["direction"] == "BUY":
-                if lo <= s["sl"]:
-                    hit, close_price = "LOSS", s["sl"]; break
-                if hi >= s["tp"]:
-                    hit, close_price = "WIN", s["tp"]; break
-            else:  # SELL
-                if hi >= s["sl"]:
-                    hit, close_price = "LOSS", s["sl"]; break
-                if lo <= s["tp"]:
-                    hit, close_price = "WIN", s["tp"]; break
 
-        if hit:
+            if s["status"] == "TP1_HIT":
+                # Phase 2 — SL = entry (breakeven), TP = tp2
+                tp2 = s.get("tp2")
+                if tp2 is None:
+                    break
+                if s["direction"] == "BUY":
+                    if lo <= s["entry"]:
+                        hit, close_price = "BREAKEVEN", s["entry"]; break
+                    if hi >= tp2:
+                        hit, close_price = "WIN", tp2; break
+                else:
+                    if hi >= s["entry"]:
+                        hit, close_price = "BREAKEVEN", s["entry"]; break
+                    if lo <= tp2:
+                        hit, close_price = "WIN", tp2; break
+            else:
+                # Phase 1 — SL = original sl, TP = tp1
+                if s["direction"] == "BUY":
+                    if lo <= s["sl"]:
+                        hit, close_price = "LOSS", s["sl"]; break
+                    if hi >= s["tp"]:
+                        hit, close_price = "TP1_HIT", s["tp"]; break
+                else:
+                    if hi >= s["sl"]:
+                        hit, close_price = "LOSS", s["sl"]; break
+                    if lo <= s["tp"]:
+                        hit, close_price = "TP1_HIT", s["tp"]; break
+
+        if hit == "TP1_HIT":
+            # Transition: not yet closed — move SL to entry, target TP2
+            storage.set_tp1_hit(db, s["id"])
+            discord_poster.post_tp1_hit(
+                s["id"], s["direction"], s["entry"], s.get("tp2"), symbol=symbol)
+            print(f"[{symbol}] Signal #{s['id']} -> TP1 HIT! SL now at entry "
+                  f"{s['entry']}, targeting TP2 {s.get('tp2')}")
+
+        elif hit in ("WIN", "LOSS", "BREAKEVEN"):
             storage.close_signal(db, s["id"], hit, close_price)
-            learner.update_weights(db, s["contributors"], s["direction"], won=(hit == "WIN"))
+            if hit != "BREAKEVEN":
+                learner.update_weights(
+                    db, s["contributors"], s["direction"], won=(hit == "WIN"))
             new_bal, pnl = storage.record_demo_trade(
                 db, s["id"], s["direction"], hit,
                 entry=s["entry"], sl=s["sl"], close_price=close_price)
@@ -75,7 +113,7 @@ def check_open_signals(symbol, db, timeframes):
                 storage.stats(db), symbol=symbol,
                 pnl=pnl, new_balance=new_bal,
             )
-            pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
+            pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"${pnl:.2f}"
             print(f"[{symbol}] Signal #{s['id']} -> {hit} @ {close_price} "
                   f"| Demo P&L {pnl_str} | Balance ${new_bal:.2f}")
 
