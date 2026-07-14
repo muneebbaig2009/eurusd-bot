@@ -78,9 +78,15 @@ PRIMARY_TF = "1h"
 
 # --- Demo account ---
 DEMO_INITIAL_BALANCE = 100.0   # starting balance in USD
-DEMO_RISK_PCT        = 0.02    # risk 2% of current balance per trade (compounds with account)
-# Derived: what $2 risk means at the starting balance — used only as a fallback/display default
-DEMO_RISK_PER_TRADE  = round(DEMO_INITIAL_BALANCE * DEMO_RISK_PCT, 2)  # $2.00
+DEMO_RISK_PCT        = 0.02    # 2% of balance risked per trade (used to compute lot size)
+DEMO_RISK_PER_TRADE  = round(DEMO_INITIAL_BALANCE * DEMO_RISK_PCT, 2)  # $2.00 at start
+
+# --- MT5 Lot Sizing (EUR/USD and GBP/USD both have USD as quote currency) ---
+PIP_SIZE           = 0.0001   # 1 pip = 0.0001 for 5-digit EUR/USD, GBP/USD
+PIP_VALUE_PER_LOT  = 10.0    # USD per pip per standard lot (100,000 units)
+MIN_LOT            = 0.01     # micro lot (1,000 units) — smallest practical size
+LOT_STEP           = 0.01     # lot increment
+MAX_LOT            = 100.0    # safety cap
 
 # --- Learning ---
 # Starting weight for every technique

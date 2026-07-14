@@ -111,8 +111,7 @@
   .pill.WIN{color:var(--buy);background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3)}
   .pill.LOSS{color:var(--sell);background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3)}
   .pill.OPEN{color:var(--accent);background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3)}
-  .pill.TP1_HIT{color:#ffa500;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.3)}
-  .pill.BREAKEVEN{color:#ffa500;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.3)}
+  .lots{color:var(--accent);font-size:12px;font-weight:600}
   .num{font-variant-numeric:tabular-nums}
   .muted{color:var(--muted)}
   .contrib{font-size:11px;color:var(--muted)}
@@ -147,8 +146,8 @@
 
   <footer>
     Auto-generated technical signals for education only — not financial advice. Free data may be delayed.
-    Win/loss is measured by whether take-profit or stop-loss was reached first.
-    Demo account risks <span id="footerRiskPct">2</span>% of current balance per trade (compounds as the account grows) — for simulation only.
+    Signals are designed for MetaTrader 5. Win/loss is measured by whether TP or SL is reached first.
+    Demo account risks <span id="footerRiskPct">2</span>% of balance per trade; lot size is calculated per signal — for simulation only.
   </footer>
 
 <script>
@@ -270,7 +269,6 @@ function render(d){
       <div class="stat"><div class="label">Total Signals</div><div class="value num">${s.total}</div></div>
       <div class="stat"><div class="label">Wins</div><div class="value win num">${s.wins}</div></div>
       <div class="stat"><div class="label">Losses</div><div class="value loss num">${s.losses}</div></div>
-      ${(s.breakevens||0)>0?`<div class="stat"><div class="label">Breakeven</div><div class="value num" style="color:#ffa500">${s.breakevens}</div></div>`:''}
       <div class="stat"><div class="label">Open</div><div class="value num">${s.open}</div></div>
       <div class="stat"><div class="label">Win Rate</div><div class="value num">${s.win_rate}%</div></div>
     </div>
@@ -278,7 +276,7 @@ function render(d){
 
   <!-- Demo account -->
   <section>
-    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(starts $${(dm.initial_balance||100).toFixed(2)} · ${(dm.risk_pct||2).toFixed(0)}% risk/trade)</span></h2>
+    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(MT5 · starts $${(dm.initial_balance||100).toFixed(2)} · ${(dm.risk_pct||2).toFixed(0)}% risk/trade)</span></h2>
     <div class="stats" style="margin-bottom:16px">
       <div class="stat">
         <div class="label">Balance</div>
@@ -294,9 +292,9 @@ function render(d){
         <div class="value ${retClass} num">${retSign}${retPct.toFixed(1)}%</div>
       </div>
       <div class="stat">
-        <div class="label">Next Trade Risk</div>
-        <div class="value num">$${risk.toFixed(2)}</div>
-        <div class="sublabel">${(dm.risk_pct||2).toFixed(0)}% of balance</div>
+        <div class="label">Risk / Trade</div>
+        <div class="value num">${(dm.risk_pct||2).toFixed(0)}%</div>
+        <div class="sublabel">of balance · $${risk.toFixed(2)} next</div>
       </div>
     </div>
     <div class="panel">
@@ -308,7 +306,7 @@ function render(d){
 
   <!-- Equity curve -->
   <section>
-    <h2>Equity Curve <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(+1 win / −1 loss / 0 breakeven, cumulative)</span></h2>
+    <h2>Equity Curve <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(+1 win / −1 loss, cumulative)</span></h2>
     <div class="panel">
       ${d.equity.length ? '<canvas class="chart" id="equityChart"></canvas>' : '<div class="empty">No closed signals yet — the curve appears once trades resolve.</div>'}
     </div>
@@ -335,29 +333,33 @@ function render(d){
       <table>
         <thead><tr>
           <th>#</th><th>Time</th><th>Side</th><th>TF</th><th>Entry</th>
-          <th>SL</th><th>TP1</th><th>TP2</th><th>R:R</th><th>Conf</th><th>Trend</th>
+          <th>SL</th><th>TP</th><th>Lots</th><th>R:R</th><th>Conf</th>
           <th>Status</th><th>Closed</th><th>P&amp;L</th><th>Balance</th><th>Reasons</th>
         </tr></thead>
         <tbody>
-          ${d.signals.map(sig=>`
+          ${d.signals.map(sig=>{
+            const PIP=0.0001;
+            const tp=sig.tp1||sig.tp;
+            const slPips=sig.sl?((Math.abs(sig.entry-sig.sl)/PIP).toFixed(1)):"—";
+            const tpPips=tp?((Math.abs(sig.entry-tp)/PIP).toFixed(1)):"—";
+            return `
             <tr>
               <td class="muted num">${sig.id}</td>
               <td class="muted">${timeAgo(sig.created_at)}</td>
               <td><span class="pill ${sig.direction}">${sig.direction}</span></td>
               <td class="muted">${sig.timeframe||"—"}</td>
               <td class="num">${fmt(sig.entry)}</td>
-              <td class="num">${fmt(sig.sl)}</td>
-              <td class="num">${sig.tp1?fmt(sig.tp1):fmt(sig.tp)}</td>
-              <td class="num">${sig.tp2?fmt(sig.tp2):"—"}</td>
+              <td class="num" title="${slPips} pips">${fmt(sig.sl)}</td>
+              <td class="num" title="${tpPips} pips">${tp?fmt(tp):"—"}</td>
+              <td class="lots num">${sig.lot_size!=null?sig.lot_size+"L":"—"}</td>
               <td class="num muted">${sig.rr?("1:"+sig.rr):"—"}</td>
               <td class="num">${sig.confidence!=null?sig.confidence+"%":"—"}</td>
-              <td class="num muted">${sig.trend_strength!=null?sig.trend_strength:"—"}</td>
               <td><span class="pill ${sig.status}">${sig.status}</span></td>
               <td class="num muted">${sig.close_price?fmt(sig.close_price):"—"}</td>
               <td class="num">${pnlHtml(sig.pnl)}</td>
               <td class="num muted">${sig.balance_after!=null?"$"+sig.balance_after.toFixed(2):"—"}</td>
               <td class="contrib">${contribHtml(sig.contributors)}</td>
-            </tr>`).join("")}
+            </tr>`;}).join("")}
         </tbody>
       </table>
     </div>` : '<div class="empty">No signals yet. The bot posts here after its first qualifying setup.</div>'}

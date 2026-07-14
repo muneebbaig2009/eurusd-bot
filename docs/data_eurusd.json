@@ -1,10 +1,9 @@
 {
-  "updated_at": "2026-07-14T12:56:18.280041+00:00",
+  "updated_at": "2026-07-14T14:39:01.223978+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 18,
     "losses": 19,
-    "breakevens": 0,
     "open": 1,
     "total": 38,
     "win_rate": 48.6
@@ -57,89 +56,127 @@
   ],
   "demo": {
     "initial_balance": 100.0,
-    "balance": 116.03,
-    "pnl_total": 16.03,
-    "return_pct": 16.0,
+    "balance": 119.1,
+    "pnl_total": 19.1,
+    "return_pct": 19.1,
     "risk_pct": 2.0,
-    "risk_per_trade": 2.32,
     "balance_history": [
       100.0,
-      98.0,
-      96.0,
-      94.0,
-      92.0,
-      90.0,
-      88.0,
-      86.0,
-      84.0,
-      82.0,
-      80.0,
-      78.0,
-      81.0,
-      84.0,
-      87.0,
-      89.99,
-      92.98,
-      95.99,
-      99.0,
-      102.0,
-      105.0,
-      103.0,
-      101.0,
-      104.0,
-      107.0,
-      110.0,
-      113.01,
-      111.01,
-      114.01,
-      117.0,
-      120.01,
-      123.02,
-      126.03,
-      124.03,
-      122.03,
-      120.03,
-      118.03,
-      116.03
+      97.82,
+      96.25,
+      94.71,
+      93.17,
+      91.33,
+      89.15,
+      86.96,
+      84.89,
+      82.79,
+      80.69,
+      78.69,
+      82.21,
+      85.79,
+      89.31,
+      92.9,
+      96.49,
+      100.07,
+      103.65,
+      107.24,
+      110.85,
+      108.19,
+      105.85,
+      109.93,
+      112.15,
+      114.4,
+      117.7,
+      115.0,
+      117.61,
+      120.29,
+      123.01,
+      125.73,
+      128.45,
+      126.57,
+      124.68,
+      122.79,
+      120.9,
+      119.1
     ],
     "per_signal_pnl": {
-      "1": -2.0,
-      "2": -2.0,
-      "3": -2.0,
-      "4": -2.0,
-      "5": -2.0,
-      "6": -2.0,
-      "7": -2.0,
-      "8": -2.0,
-      "9": -2.0,
-      "10": -2.0,
+      "1": -2.18,
+      "2": -1.57,
+      "3": -1.54,
+      "4": -1.54,
+      "5": -1.84,
+      "6": -2.18,
+      "7": -2.19,
+      "8": -2.07,
+      "9": -2.1,
+      "10": -2.1,
       "11": -2.0,
-      "12": 3.0,
-      "13": 3.0,
-      "14": 3.0,
-      "15": 2.99,
-      "16": 2.99,
-      "17": 3.01,
-      "18": 3.01,
-      "19": 3.0,
-      "20": 3.0,
-      "21": -2.0,
-      "22": -2.0,
-      "23": 3.0,
-      "24": 3.0,
-      "25": 3.0,
-      "26": 3.01,
-      "27": -2.0,
-      "28": 3.0,
-      "29": 2.99,
-      "30": 3.01,
-      "31": 3.01,
-      "32": 3.01,
-      "33": -2.0,
-      "34": -2.0,
-      "35": -2.0,
-      "36": -2.0,
-      "37": -2.0
+      "12": 3.52,
+      "13": 3.58,
+      "14": 3.52,
+      "15": 3.59,
+      "16": 3.59,
+      "17": 3.58,
+      "18": 3.58,
+      "19": 3.59,
+      "20": 3.61,
+      "21": -2.66,
+      "22": -2.34,
+      "23": 4.08,
+      "24": 2.22,
+      "25": 2.25,
+      "26": 3.3,
+      "27": -2.7,
+      "28": 2.61,
+      "29": 2.68,
+      "30": 2.72,
+      "31": 2.72,
+      "32": 2.72,
+      "33": -1.88,
+      "34": -1.89,
+      "35": -1.89,
+      "36": -1.89,
+      "37": -1.8
+    },
+    "per_signal_lot": {
+      "1": 0.02,
+      "2": 0.01,
+      "3": 0.01,
+      "4": 0.01,
+      "5": 0.01,
+      "6": 0.01,
+      "7": 0.01,
+      "8": 0.01,
+      "9": 0.01,
+      "10": 0.01,
+      "11": 0.01,
+      "12": 0.01,
+      "13": 0.01,
+      "14": 0.01,
+      "15": 0.01,
+      "16": 0.01,
+      "17": 0.01,
+      "18": 0.01,
+      "19": 0.01,
+      "20": 0.01,
+      "21": 0.02,
+      "22": 0.02,
+      "23": 0.02,
+      "24": 0.01,
+      "25": 0.01,
+      "26": 0.03,
+      "27": 0.03,
+      "28": 0.01,
+      "29": 0.01,
+      "30": 0.01,
+      "31": 0.01,
+      "32": 0.01,
+      "33": 0.01,
+      "34": 0.01,
+      "35": 0.01,
+      "36": 0.01,
+      "37": 0.01
     }
   },
   "signals": [
@@ -167,6 +204,7 @@
       "rr": 1.5,
       "trend_strength": 17,
       "timeframe": "1h",
+      "lot_size": null,
       "pnl": null,
       "balance_after": null
     },
@@ -194,8 +232,9 @@
       "rr": 1.5,
       "trend_strength": 28,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 116.03
+      "lot_size": null,
+      "pnl": -1.8,
+      "balance_after": 119.1
     },
     {
       "id": 36,
@@ -221,8 +260,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 118.03
+      "lot_size": null,
+      "pnl": -1.89,
+      "balance_after": 120.9
     },
     {
       "id": 35,
@@ -248,8 +288,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 120.03
+      "lot_size": null,
+      "pnl": -1.89,
+      "balance_after": 122.79
     },
     {
       "id": 34,
@@ -275,8 +316,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 122.03
+      "lot_size": null,
+      "pnl": -1.89,
+      "balance_after": 124.68
     },
     {
       "id": 33,
@@ -302,8 +344,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 124.03
+      "lot_size": null,
+      "pnl": -1.88,
+      "balance_after": 126.57
     },
     {
       "id": 32,
@@ -329,8 +372,9 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.01,
-      "balance_after": 126.03
+      "lot_size": null,
+      "pnl": 2.72,
+      "balance_after": 128.45
     },
     {
       "id": 31,
@@ -356,8 +400,9 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.01,
-      "balance_after": 123.02
+      "lot_size": null,
+      "pnl": 2.72,
+      "balance_after": 125.73
     },
     {
       "id": 30,
@@ -383,8 +428,9 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.01,
-      "balance_after": 120.01
+      "lot_size": null,
+      "pnl": 2.72,
+      "balance_after": 123.01
     },
     {
       "id": 29,
@@ -410,8 +456,9 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 2.99,
-      "balance_after": 117.0
+      "lot_size": null,
+      "pnl": 2.68,
+      "balance_after": 120.29
     },
     {
       "id": 28,
@@ -437,8 +484,9 @@
       "rr": 1.5,
       "trend_strength": 32,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 114.01
+      "lot_size": null,
+      "pnl": 2.61,
+      "balance_after": 117.61
     },
     {
       "id": 27,
@@ -464,8 +512,9 @@
       "rr": 1.5,
       "trend_strength": 40,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 111.01
+      "lot_size": null,
+      "pnl": -2.7,
+      "balance_after": 115.0
     },
     {
       "id": 26,
@@ -491,8 +540,9 @@
       "rr": 1.5,
       "trend_strength": 37,
       "timeframe": "1h",
-      "pnl": 3.01,
-      "balance_after": 113.01
+      "lot_size": null,
+      "pnl": 3.3,
+      "balance_after": 117.7
     },
     {
       "id": 25,
@@ -518,8 +568,9 @@
       "rr": 1.5,
       "trend_strength": 15,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 110.0
+      "lot_size": null,
+      "pnl": 2.25,
+      "balance_after": 114.4
     },
     {
       "id": 24,
@@ -545,8 +596,9 @@
       "rr": 1.5,
       "trend_strength": 15,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 107.0
+      "lot_size": null,
+      "pnl": 2.22,
+      "balance_after": 112.15
     },
     {
       "id": 23,
@@ -572,8 +624,9 @@
       "rr": 1.5,
       "trend_strength": 31,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 104.0
+      "lot_size": null,
+      "pnl": 4.08,
+      "balance_after": 109.93
     },
     {
       "id": 22,
@@ -599,8 +652,9 @@
       "rr": 1.5,
       "trend_strength": 51,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 101.0
+      "lot_size": null,
+      "pnl": -2.34,
+      "balance_after": 105.85
     },
     {
       "id": 21,
@@ -626,8 +680,9 @@
       "rr": 1.5,
       "trend_strength": 19,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 103.0
+      "lot_size": null,
+      "pnl": -2.66,
+      "balance_after": 108.19
     },
     {
       "id": 20,
@@ -653,8 +708,9 @@
       "rr": 1.5,
       "trend_strength": 32,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 105.0
+      "lot_size": null,
+      "pnl": 3.61,
+      "balance_after": 110.85
     },
     {
       "id": 19,
@@ -680,8 +736,9 @@
       "rr": 1.5,
       "trend_strength": 32,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 102.0
+      "lot_size": null,
+      "pnl": 3.59,
+      "balance_after": 107.24
     },
     {
       "id": 18,
@@ -707,8 +764,9 @@
       "rr": 1.5,
       "trend_strength": 31,
       "timeframe": "1h",
-      "pnl": 3.01,
-      "balance_after": 99.0
+      "lot_size": null,
+      "pnl": 3.58,
+      "balance_after": 103.65
     },
     {
       "id": 17,
@@ -734,8 +792,9 @@
       "rr": 1.5,
       "trend_strength": 31,
       "timeframe": "1h",
-      "pnl": 3.01,
-      "balance_after": 95.99
+      "lot_size": null,
+      "pnl": 3.58,
+      "balance_after": 100.07
     },
     {
       "id": 16,
@@ -761,8 +820,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": 2.99,
-      "balance_after": 92.98
+      "lot_size": null,
+      "pnl": 3.59,
+      "balance_after": 96.49
     },
     {
       "id": 15,
@@ -788,8 +848,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": 2.99,
-      "balance_after": 89.99
+      "lot_size": null,
+      "pnl": 3.59,
+      "balance_after": 92.9
     },
     {
       "id": 14,
@@ -815,8 +876,9 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 87.0
+      "lot_size": null,
+      "pnl": 3.52,
+      "balance_after": 89.31
     },
     {
       "id": 13,
@@ -842,8 +904,9 @@
       "rr": 1.5,
       "trend_strength": 26,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 84.0
+      "lot_size": null,
+      "pnl": 3.58,
+      "balance_after": 85.79
     },
     {
       "id": 12,
@@ -869,8 +932,9 @@
       "rr": 1.5,
       "trend_strength": 26,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 81.0
+      "lot_size": null,
+      "pnl": 3.52,
+      "balance_after": 82.21
     },
     {
       "id": 11,
@@ -896,8 +960,9 @@
       "rr": 1.5,
       "trend_strength": 20,
       "timeframe": "1h",
+      "lot_size": null,
       "pnl": -2.0,
-      "balance_after": 78.0
+      "balance_after": 78.69
     },
     {
       "id": 10,
@@ -923,8 +988,9 @@
       "rr": 1.5,
       "trend_strength": 20,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 80.0
+      "lot_size": null,
+      "pnl": -2.1,
+      "balance_after": 80.69
     },
     {
       "id": 9,
@@ -950,8 +1016,9 @@
       "rr": 1.5,
       "trend_strength": 20,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 82.0
+      "lot_size": null,
+      "pnl": -2.1,
+      "balance_after": 82.79
     },
     {
       "id": 8,
@@ -977,8 +1044,9 @@
       "rr": 1.5,
       "trend_strength": 20,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 84.0
+      "lot_size": null,
+      "pnl": -2.07,
+      "balance_after": 84.89
     },
     {
       "id": 7,
@@ -1004,8 +1072,9 @@
       "rr": 1.5,
       "trend_strength": 21,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 86.0
+      "lot_size": null,
+      "pnl": -2.19,
+      "balance_after": 86.96
     },
     {
       "id": 6,
@@ -1031,8 +1100,9 @@
       "rr": 1.5,
       "trend_strength": 21,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 88.0
+      "lot_size": null,
+      "pnl": -2.18,
+      "balance_after": 89.15
     },
     {
       "id": 5,
@@ -1058,8 +1128,9 @@
       "rr": 1.5,
       "trend_strength": 26,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 90.0
+      "lot_size": null,
+      "pnl": -1.84,
+      "balance_after": 91.33
     },
     {
       "id": 4,
@@ -1085,8 +1156,9 @@
       "rr": 1.5,
       "trend_strength": 23,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 92.0
+      "lot_size": null,
+      "pnl": -1.54,
+      "balance_after": 93.17
     },
     {
       "id": 3,
@@ -1112,8 +1184,9 @@
       "rr": 1.5,
       "trend_strength": 23,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 94.0
+      "lot_size": null,
+      "pnl": -1.54,
+      "balance_after": 94.71
     },
     {
       "id": 2,
@@ -1139,8 +1212,9 @@
       "rr": 1.5,
       "trend_strength": 21,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 96.0
+      "lot_size": null,
+      "pnl": -1.57,
+      "balance_after": 96.25
     },
     {
       "id": 1,
@@ -1166,8 +1240,9 @@
       "rr": 1.5,
       "trend_strength": 35,
       "timeframe": "1h",
-      "pnl": -2.0,
-      "balance_after": 98.0
+      "lot_size": null,
+      "pnl": -2.18,
+      "balance_after": 97.82
     }
   ]
 }

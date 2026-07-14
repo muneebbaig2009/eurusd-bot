@@ -15,78 +15,79 @@ def _send(embed: dict):
     resp.raise_for_status()
 
 
-def _pip_pnl(entry: float, target: float, sl: float, risk_amount: float) -> float:
-    """Dollar P&L if `target` is hit, scaled to risk_amount (= 2% of current balance)."""
-    sl_dist = abs(entry - sl)
-    if sl_dist <= 0:
-        return 0.0
-    return round(risk_amount * abs(target - entry) / sl_dist, 2)
+def _pips(price_a: float, price_b: float) -> float:
+    """Pip distance between two prices."""
+    return round(abs(price_a - price_b) / config.PIP_SIZE, 1)
+
+
+def _usd(pips: float, lot_size: float) -> float:
+    """Dollar value of a pip move for a given lot size."""
+    return round(pips * lot_size * config.PIP_VALUE_PER_LOT, 2)
 
 
 def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
                 demo_balance: float = None):
-    """Posted when a new signal fires. Shows exact TP1 / TP2 / SL dollar amounts."""
+    """New signal alert. Shows lot size, pip distances, and dollar risk/reward."""
     color = 0x3fb950 if sig["direction"] == "BUY" else 0xf85149
     arrow = "📈" if sig["direction"] == "BUY" else "📉"
+
+    entry  = sig["entry"]
+    sl     = sig["sl"]
+    tp1    = sig.get("tp1") or sig["tp"]
+    tp2    = sig.get("tp2")
+    lot    = sig.get("lot_size", config.MIN_LOT)
+    bal    = demo_balance if demo_balance is not None else config.DEMO_INITIAL_BALANCE
+
+    sl_pips  = _pips(entry, sl)
+    tp1_pips = _pips(entry, tp1)
+    sl_usd   = _usd(sl_pips,  lot)
+    tp1_usd  = _usd(tp1_pips, lot)
+
+    tp2_line = ""
+    if tp2:
+        tp2_pips = _pips(entry, tp2)
+        tp2_usd  = _usd(tp2_pips, lot)
+        tp2_line = f"\nTP2 (optional)  `{tp2}`  +{tp2_pips:.1f} pips  `+${tp2_usd:.2f}`"
+
     contributors = "  ·  ".join(
         f"{t}({'+' if v > 0 else ''}{v})"
         for t, v in sig["contributors"].items() if v != 0
-    )
-
-    entry   = sig["entry"]
-    sl      = sig["sl"]
-    tp1     = sig.get("tp1") or sig["tp"]
-    tp2     = sig.get("tp2")
-    balance = demo_balance if demo_balance is not None else config.DEMO_INITIAL_BALANCE
-    risk    = round(balance * config.DEMO_RISK_PCT, 2)
-
-    reward_tp1 = _pip_pnl(entry, tp1, sl, risk)
-    reward_tp2 = _pip_pnl(entry, tp2, sl, risk) if tp2 else None
-
-    tp2_line = f"\nTP2 Reward  `+${reward_tp2:.2f}`" if reward_tp2 is not None else ""
-    demo_value = (
-        f"Balance  **${balance:.2f}**\n"
-        f"SL Risk  `-${risk:.2f}`\n"
-        f"TP1 Reward  `+${reward_tp1:.2f}`"
-        f"{tp2_line}"
     )
 
     embed = {
         "title": f"{arrow} {sig['direction']} {symbol}  (#{signal_id})",
         "color": color,
         "fields": [
-            {"name": "Entry",          "value": f"`{entry}`",                          "inline": True},
-            {"name": "Stop Loss",      "value": f"`{sl}`",                             "inline": True},
-            {"name": "Timeframe",      "value": f"`{sig.get('timeframe','1h')}`",       "inline": True},
-            {"name": "Take Profit 1",  "value": f"`{tp1}`",                            "inline": True},
-            {"name": "Take Profit 2",  "value": f"`{tp2 or '—'}`",                     "inline": True},
-            {"name": "Risk : Reward",  "value": f"`1 : {sig.get('rr','—')}`",           "inline": True},
-            {"name": "Confidence",     "value": f"`{sig.get('confidence','—')}%`",      "inline": True},
-            {"name": "Trend Strength", "value": f"`{sig.get('trend_strength','—')}/100`","inline": True},
-            {"name": "Score",          "value": f"`{sig['score']}`",                   "inline": True},
-            {"name": "Reasons",        "value": contributors or "—",                   "inline": False},
-            {"name": "💰 Demo Account","value": demo_value,                             "inline": False},
-        ],
-        "footer": {"text": "Auto-generated · Educational use only · Not financial advice"},
-    }
-    _send(embed)
-
-
-def post_tp1_hit(signal_id: int, direction: str, entry: float, tp2: float,
-                 symbol: str = "EUR/USD"):
-    """Mid-trade alert: TP1 reached, SL moved to entry, now targeting TP2."""
-    embed = {
-        "title": f"🎯 TP1 HIT — {direction} {symbol}  (#{signal_id})",
-        "color": 0xffa500,
-        "description": (
-            "**TP1 was reached!** Stop loss has been moved to **entry (breakeven)**.\n"
-            "The trade is now **risk-free** and is targeting **TP2**.\n\n"
-            f"> Update your broker SL to `{entry}` now."
-        ),
-        "fields": [
-            {"name": "New Stop Loss", "value": f"`{entry}`  *(breakeven)*", "inline": True},
-            {"name": "New Target",    "value": f"`{tp2 or '—'}`",           "inline": True},
-            {"name": "Worst Case",    "value": "`Breakeven  ($0.00)`",      "inline": True},
+            {"name": "Entry",
+             "value": f"`{entry}`",
+             "inline": True},
+            {"name": "Stop Loss",
+             "value": f"`{sl}`\n−{sl_pips:.1f} pips  `−${sl_usd:.2f}`",
+             "inline": True},
+            {"name": "Take Profit",
+             "value": f"`{tp1}`\n+{tp1_pips:.1f} pips  `+${tp1_usd:.2f}`{tp2_line}",
+             "inline": True},
+            {"name": "Lot Size",
+             "value": f"**{lot} lots**",
+             "inline": True},
+            {"name": "R : R",
+             "value": f"`1 : {sig.get('rr', '—')}`",
+             "inline": True},
+            {"name": "Demo Balance",
+             "value": f"`${bal:.2f}`",
+             "inline": True},
+            {"name": "Confidence",
+             "value": f"`{sig.get('confidence', '—')}%`",
+             "inline": True},
+            {"name": "Trend Strength",
+             "value": f"`{sig.get('trend_strength', '—')}/100`",
+             "inline": True},
+            {"name": "Timeframe",
+             "value": f"`{sig.get('timeframe', '1h')}`",
+             "inline": True},
+            {"name": "Reasons",
+             "value": contributors or "—",
+             "inline": False},
         ],
         "footer": {"text": "Auto-generated · Educational use only · Not financial advice"},
     }
@@ -96,59 +97,54 @@ def post_tp1_hit(signal_id: int, direction: str, entry: float, tp2: float,
 def post_result(signal_id: int, direction: str, status: str,
                 entry: float, close_price: float, stats: dict,
                 symbol: str = "EUR/USD",
-                pnl: float = None, new_balance: float = None):
-    """Posted when a signal closes (WIN / LOSS / BREAKEVEN). Shows P&L and updated balance."""
-    if status == "WIN":
-        color, emoji = 0x3fb950, "✅"
-    elif status == "BREAKEVEN":
-        color, emoji = 0xffa500, "↩️"
-    else:
-        color, emoji = 0xf85149, "❌"
+                pnl: float = None, new_balance: float = None,
+                lot_size: float = None):
+    """Trade close alert (WIN or LOSS). Shows pip move and dollar P&L."""
+    won   = status == "WIN"
+    color = 0x3fb950 if won else 0xf85149
+    emoji = "✅" if won else "❌"
 
-    # P&L line
+    pip_move = _pips(entry, close_price)
+    lot_str  = f"{lot_size} lots" if lot_size else "—"
+
     if pnl is not None:
-        if pnl == 0:
-            pnl_str, pnl_emoji = "$0.00  *(breakeven)*", "🔄"
-        elif pnl > 0:
-            pnl_str, pnl_emoji = f"+${pnl:.2f}", "💰"
-        else:
-            pnl_str, pnl_emoji = f"-${abs(pnl):.2f}", "💸"
+        sign     = "+" if pnl >= 0 else ""
+        pip_sign = "+" if won else "−"
+        pnl_str  = f"**{sign}${abs(pnl):.2f}**  ({pip_sign}{pip_move:.1f} pips)"
+        pnl_emoji = "💰" if pnl >= 0 else "💸"
     else:
         pnl_str, pnl_emoji = "—", "💰"
 
-    # Balance line
     if new_balance is not None:
         initial    = config.DEMO_INITIAL_BALANCE
         total_pnl  = round(new_balance - initial, 2)
         return_pct = round((new_balance / initial - 1) * 100, 1)
         ret_sign   = "+" if return_pct >= 0 else ""
-        bal_str    = (
-            f"**${new_balance:.2f}**  "
-            f"({ret_sign}{return_pct:.1f}% overall  ·  "
-            f"total P&L {'+' if total_pnl >= 0 else ''}${total_pnl:.2f})"
-        )
+        bal_str = (f"**${new_balance:.2f}**  "
+                   f"({ret_sign}{return_pct:.1f}%  ·  "
+                   f"total P&L {'+' if total_pnl >= 0 else ''}${total_pnl:.2f})")
     else:
         bal_str = "—"
 
-    # Record line
-    wins, losses = stats["wins"], stats["losses"]
-    bes = stats.get("breakevens", 0)
-    be_part = f"  ·  BE **{bes}**" if bes else ""
-    record_str = (
-        f"W **{wins}**  ·  L **{losses}**{be_part}"
-        f"  ·  Win rate **{stats['win_rate']}%**"
-    )
+    record_str = (f"W **{stats['wins']}**  ·  L **{stats['losses']}**"
+                  f"  ·  Win rate **{stats['win_rate']}%**")
 
     embed = {
         "title": f"{emoji} {status} — {direction} {symbol}  (#{signal_id})",
         "color": color,
         "fields": [
-            {"name": "Entry",    "value": f"`{entry}`",               "inline": True},
-            {"name": "Closed at","value": f"`{round(close_price,5)}`","inline": True},
-            {"name": "​",   "value": "​",                   "inline": True},
-            {"name": f"{pnl_emoji} Trade P&L",
-             "value": f"**{pnl_str}**",
+            {"name": "Entry",
+             "value": f"`{entry}`",
              "inline": True},
+            {"name": "Closed at",
+             "value": f"`{round(close_price, 5)}`",
+             "inline": True},
+            {"name": "Lot Size",
+             "value": f"`{lot_str}`",
+             "inline": True},
+            {"name": f"{pnl_emoji} Trade P&L",
+             "value": pnl_str,
+             "inline": False},
             {"name": "Demo Balance",
              "value": bal_str,
              "inline": False},
