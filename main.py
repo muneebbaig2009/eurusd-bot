@@ -72,6 +72,7 @@ def check_open_signals(symbol, db, timeframes):
             discord_poster.post_result(
                 s["id"], s["direction"], hit, s["entry"], close_price,
                 storage.stats(db), symbol=symbol,
+                pnl=pnl, new_balance=new_bal,
             )
             pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
             print(f"[{symbol}] Signal #{s['id']} -> {hit} @ {close_price} "
@@ -98,7 +99,8 @@ def try_new_signal(symbol, db, timeframes):
         print(f"[{symbol}] No valid signal this cycle.")
         return
     sid = storage.log_signal(db, sig)
-    discord_poster.post_signal(sig, sid, symbol=symbol)
+    demo_balance = storage.get_demo_stats(db)["balance"]
+    discord_poster.post_signal(sig, sid, symbol=symbol, demo_balance=demo_balance)
     print(f"[{symbol}] Posted #{sid}: {sig['direction']} @ {sig['entry']} "
           f"(conf {sig['confidence']}%, R:R 1:{sig['rr']})")
 
