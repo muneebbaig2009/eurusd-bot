@@ -43,6 +43,17 @@ def init_db(db):
             timeframe TEXT
         )
     """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS demo_account (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            signal_id     INTEGER NOT NULL UNIQUE,
+            direction     TEXT NOT NULL,
+            status        TEXT NOT NULL,
+            pnl           REAL NOT NULL,
+            balance_after REAL NOT NULL,
+            closed_at     TEXT
+        )
+    """)
     con.commit()
     # Migration for older databases
     existing = {row[1] for row in cur.execute("PRAGMA table_info(signals)").fetchall()}
@@ -54,6 +65,85 @@ def init_db(db):
             cur.execute(f"ALTER TABLE signals ADD COLUMN {col} {coltype}")
     con.commit()
     con.close()
+    _backfill_demo(db)
+
+
+def _backfill_demo(db):
+    """Back-fill demo_account rows for any closed signals not yet recorded."""
+    con = _conn(db)
+    cur = con.cursor()
+    cur.execute("""
+        SELECT s.id, s.direction, s.status, s.rr, s.closed_at
+        FROM signals s
+        WHERE s.status IN ('WIN','LOSS')
+          AND s.id NOT IN (SELECT signal_id FROM demo_account)
+        ORDER BY s.id ASC
+    """)
+    missing = cur.fetchall()
+    if missing:
+        cur.execute("SELECT balance_after FROM demo_account ORDER BY id DESC LIMIT 1")
+        row = cur.fetchone()
+        balance = row[0] if row else config.DEMO_INITIAL_BALANCE
+        for sig_id, direction, status, rr, closed_at in missing:
+            rr = rr if rr else 1.5
+            pnl = round(config.DEMO_RISK_PER_TRADE * rr, 2) if status == "WIN" \
+                  else -config.DEMO_RISK_PER_TRADE
+            balance = round(balance + pnl, 2)
+            cur.execute("""
+                INSERT OR IGNORE INTO demo_account
+                    (signal_id, direction, status, pnl, balance_after, closed_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (sig_id, direction, status, pnl, balance, closed_at))
+        con.commit()
+    con.close()
+
+
+def record_demo_trade(db, signal_id: int, direction: str, status: str, rr):
+    """Record P&L for a freshly closed trade and return (new_balance, pnl)."""
+    rr = rr if rr else 1.5
+    pnl = round(config.DEMO_RISK_PER_TRADE * rr, 2) if status == "WIN" \
+          else -config.DEMO_RISK_PER_TRADE
+    con = _conn(db)
+    cur = con.cursor()
+    cur.execute("SELECT balance_after FROM demo_account ORDER BY id DESC LIMIT 1")
+    row = cur.fetchone()
+    balance = round((row[0] if row else config.DEMO_INITIAL_BALANCE) + pnl, 2)
+    cur.execute("""
+        INSERT OR IGNORE INTO demo_account
+            (signal_id, direction, status, pnl, balance_after, closed_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (signal_id, direction, status, pnl, balance,
+          datetime.now(timezone.utc).isoformat()))
+    con.commit()
+    con.close()
+    return balance, pnl
+
+
+def get_demo_stats(db) -> dict:
+    """Return demo account summary for the exporter."""
+    con = _conn(db)
+    cur = con.cursor()
+    cur.execute("SELECT balance_after FROM demo_account ORDER BY id DESC LIMIT 1")
+    last = cur.fetchone()
+    cur.execute("SELECT balance_after FROM demo_account ORDER BY id ASC")
+    history = [r[0] for r in cur.fetchall()]
+    # per-signal P&L keyed by signal_id for the exporter to attach
+    cur.execute("SELECT signal_id, pnl FROM demo_account")
+    per_signal = {r[0]: r[1] for r in cur.fetchall()}
+    con.close()
+
+    balance = last[0] if last else config.DEMO_INITIAL_BALANCE
+    pnl_total = round(balance - config.DEMO_INITIAL_BALANCE, 2)
+    return_pct = round((balance / config.DEMO_INITIAL_BALANCE - 1) * 100, 1)
+    return {
+        "initial_balance": config.DEMO_INITIAL_BALANCE,
+        "balance": balance,
+        "pnl_total": pnl_total,
+        "return_pct": return_pct,
+        "risk_per_trade": config.DEMO_RISK_PER_TRADE,
+        "balance_history": [config.DEMO_INITIAL_BALANCE] + history,
+        "per_signal_pnl": per_signal,
+    }
 
 
 def get_weight(db, technique: str) -> float:
@@ -115,13 +205,14 @@ def log_signal(db, sig: dict) -> int:
 def open_signals(db) -> list:
     con = _conn(db)
     cur = con.cursor()
-    cur.execute("SELECT id, direction, entry, tp, sl, contributors, created_at "
+    cur.execute("SELECT id, direction, entry, tp, sl, contributors, created_at, rr "
                 "FROM signals WHERE status='OPEN'")
     rows = cur.fetchall()
     con.close()
     return [
         {"id": r[0], "direction": r[1], "entry": r[2], "tp": r[3],
-         "sl": r[4], "contributors": json.loads(r[5]), "created_at": r[6]}
+         "sl": r[4], "contributors": json.loads(r[5]), "created_at": r[6],
+         "rr": r[7]}
         for r in rows
     ]
 

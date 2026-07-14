@@ -4,20 +4,26 @@ import json
 import sqlite3
 from datetime import datetime, timezone
 import config
+import storage
 
 
 def export(symbol):
     db = config.db_path(symbol)
+    storage.init_db(db)   # creates tables if missing, back-fills demo account
+
     con = sqlite3.connect(db)
     con.row_factory = sqlite3.Row
     cur = con.cursor()
 
-    # All signals, newest first
+    # All signals, newest first — LEFT JOIN demo_account to get per-trade P&L
     cur.execute("""
-        SELECT id, created_at, direction, entry, tp, sl, score,
-               contributors, status, closed_at, close_price,
-               tp1, tp2, confidence, rr, trend_strength, timeframe
-        FROM signals ORDER BY id DESC
+        SELECT s.id, s.created_at, s.direction, s.entry, s.tp, s.sl, s.score,
+               s.contributors, s.status, s.closed_at, s.close_price,
+               s.tp1, s.tp2, s.confidence, s.rr, s.trend_strength, s.timeframe,
+               da.pnl, da.balance_after
+        FROM signals s
+        LEFT JOIN demo_account da ON da.signal_id = s.id
+        ORDER BY s.id DESC
     """)
     signals = []
     for r in cur.fetchall():
@@ -39,6 +45,8 @@ def export(symbol):
             "rr": r["rr"],
             "trend_strength": r["trend_strength"],
             "timeframe": r["timeframe"],
+            "pnl": r["pnl"],
+            "balance_after": r["balance_after"],
         })
 
     # Weights
@@ -53,7 +61,7 @@ def export(symbol):
     closed = wins + losses
     win_rate = round(wins / closed * 100, 1) if closed else 0.0
 
-    # Equity curve: +1 per win, -1 per loss in chronological order
+    # Win/loss equity curve (+1 per win, -1 per loss)
     cur.execute("""
         SELECT status FROM signals
         WHERE status IN ('WIN','LOSS') ORDER BY id ASC
@@ -65,6 +73,9 @@ def export(symbol):
         equity.append(running)
 
     con.close()
+
+    # Demo account stats
+    demo = storage.get_demo_stats(db)
 
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -78,6 +89,7 @@ def export(symbol):
         },
         "weights": weights,
         "equity": equity,
+        "demo": demo,
         "signals": signals,
     }
 

@@ -76,6 +76,10 @@ CONFIRM_TIMEFRAMES = ["1h", "1day"]
 # Primary timeframe used for entry price + ATR
 PRIMARY_TF = "1h"
 
+# --- Demo account ---
+DEMO_INITIAL_BALANCE = 100.0   # starting balance in USD
+DEMO_RISK_PER_TRADE  = 2.0     # fixed USD risked per trade (2% of starting balance)
+
 # --- Learning ---
 # Starting weight for every technique
 DEFAULT_WEIGHT = 1.0

@@ -67,11 +67,15 @@ def check_open_signals(symbol, db, timeframes):
         if hit:
             storage.close_signal(db, s["id"], hit, close_price)
             learner.update_weights(db, s["contributors"], s["direction"], won=(hit == "WIN"))
+            new_bal, pnl = storage.record_demo_trade(
+                db, s["id"], s["direction"], hit, s.get("rr"))
             discord_poster.post_result(
                 s["id"], s["direction"], hit, s["entry"], close_price,
                 storage.stats(db), symbol=symbol,
             )
-            print(f"[{symbol}] Signal #{s['id']} -> {hit} @ {close_price}")
+            pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
+            print(f"[{symbol}] Signal #{s['id']} -> {hit} @ {close_price} "
+                  f"| Demo P&L {pnl_str} | Balance ${new_bal:.2f}")
 
 
 def try_new_signal(symbol, db, timeframes):
