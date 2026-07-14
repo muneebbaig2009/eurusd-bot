@@ -93,12 +93,7 @@ def init_db(db):
 
 def calc_lot_size(balance: float, entry: float, sl: float,
                   risk_pct: float = None) -> float:
-    """Suggested MT5 lot size for given risk %.
-
-    risk_pct defaults to DEMO_RISK_PCT (2%).
-    For the dual-trade strategy, pass risk_pct=DEMO_RISK_PCT/2 so each
-    trade risks 1% and the total stays at 2%.
-    """
+    """Suggested MT5 lot size for given risk % (default: DEMO_RISK_PCT = 2%)."""
     pct = risk_pct if risk_pct is not None else config.DEMO_RISK_PCT
     risk_usd = balance * pct
     sl_pips = abs(entry - sl) / config.PIP_SIZE
@@ -146,7 +141,7 @@ def _backfill_demo(db):
         for sig_id, direction, status, entry, sl, close_price, closed_at, lot in missing:
             e, s_, cp = (entry or 0), (sl or 0), (close_price or 0)
             if lot is None:
-                lot = calc_lot_size(balance, e, s_, risk_pct=config.DEMO_RISK_PCT / 2)
+                lot = calc_lot_size(balance, e, s_)
             pnl = _calc_demo_pnl(status, e, cp, lot)
             balance = round(balance + pnl, 2)
             cur.execute("""
@@ -168,7 +163,7 @@ def record_demo_trade(db, signal_id: int, direction: str, status: str,
     row = cur.fetchone()
     prev = row[0] if row else config.DEMO_INITIAL_BALANCE
     if lot_size is None:
-        lot_size = calc_lot_size(prev, entry, sl, risk_pct=config.DEMO_RISK_PCT / 2)
+        lot_size = calc_lot_size(prev, entry, sl)
     pnl = _calc_demo_pnl(status, entry, close_price, lot_size)
     new_bal = round(prev + pnl, 2)
     cur.execute("""
@@ -196,8 +191,7 @@ def get_demo_stats(db) -> dict:
     balance = last[0] if last else config.DEMO_INITIAL_BALANCE
     pnl_total  = round(balance - config.DEMO_INITIAL_BALANCE, 2)
     return_pct = round((balance / config.DEMO_INITIAL_BALANCE - 1) * 100, 1)
-    # Next trade lot is based on half of 2% risk (dual trade)
-    next_lot = calc_lot_size(balance, 1.13, 1.12, risk_pct=config.DEMO_RISK_PCT / 2)
+    next_lot = calc_lot_size(balance, 1.13, 1.12)  # noqa: F841 — kept for potential dashboard use
     return {
         "initial_balance": config.DEMO_INITIAL_BALANCE,
         "balance":         balance,
@@ -250,6 +244,30 @@ def all_weights(db) -> dict:
 # ---------------------------------------------------------------------------
 # Signals — dual-trade pair support
 # ---------------------------------------------------------------------------
+
+def log_signal(db, sig: dict) -> int:
+    """Insert one signal row and return its id (single-trade path)."""
+    now = datetime.now(timezone.utc).isoformat()
+    con = _conn(db)
+    cur = con.cursor()
+    cur.execute(
+        "INSERT INTO signals("
+        "created_at, direction, entry, tp, sl, score, contributors, status, "
+        "tp1, tp2, confidence, rr, trend_strength, timeframe, lot_size) "
+        "VALUES(?,?,?,?,?,?,?,'OPEN',?,?,?,?,?,?,?)",
+        (now, sig["direction"], sig["entry"],
+         sig.get("tp1") or sig["tp"], sig["sl"],
+         sig["score"], json.dumps(sig["contributors"]),
+         sig.get("tp1") or sig["tp"], sig.get("tp2"),
+         sig.get("confidence"), sig.get("rr"),
+         sig.get("trend_strength"), sig.get("timeframe"),
+         sig.get("lot_size")),
+    )
+    sid = cur.lastrowid
+    con.commit()
+    con.close()
+    return sid
+
 
 def log_signal_pair(db, sig: dict) -> tuple:
     """Create Trade 1 + Trade 2 records sharing the same pair_id.
@@ -395,16 +413,12 @@ def last_close_time(db):
 
 
 def stats(db) -> dict:
-    """Win rate based on Trade 1 (primary / TP1) outcomes only."""
     con = _conn(db)
     cur = con.cursor()
-    # Primary trade results: trade_num=1 (or legacy single trades where trade_num IS NULL)
-    cur.execute("""
-        SELECT status, COUNT(*) FROM signals
-        WHERE (trade_num=1 OR trade_num IS NULL)
-          AND status IN ('WIN','LOSS')
-        GROUP BY status
-    """)
+    cur.execute(
+        "SELECT status, COUNT(*) FROM signals "
+        "WHERE status IN ('WIN','LOSS') GROUP BY status"
+    )
     rows = dict(cur.fetchall())
     # Total OPEN: any open trade
     cur.execute("SELECT COUNT(*) FROM signals WHERE status='OPEN'")

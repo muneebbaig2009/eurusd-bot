@@ -58,16 +58,13 @@ def export(symbol):
     cur.execute("SELECT technique, weight FROM weights ORDER BY technique")
     weights = {row["technique"]: row["weight"] for row in cur.fetchall()}
 
-    # Stats: win rate uses only primary trades (trade_num=1 or legacy)
-    cur.execute("""
-        SELECT status, COUNT(*) c FROM signals
-        WHERE (trade_num=1 OR trade_num IS NULL)
-          AND status IN ('WIN','LOSS')
-        GROUP BY status
-    """)
-    by_primary = {row["status"]: row["c"] for row in cur.fetchall()}
-    wins   = by_primary.get("WIN", 0)
-    losses = by_primary.get("LOSS", 0)
+    cur.execute(
+        "SELECT status, COUNT(*) c FROM signals "
+        "WHERE status IN ('WIN','LOSS') GROUP BY status"
+    )
+    by_status  = {row["status"]: row["c"] for row in cur.fetchall()}
+    wins   = by_status.get("WIN", 0)
+    losses = by_status.get("LOSS", 0)
     closed = wins + losses
 
     cur.execute("SELECT COUNT(*) c FROM signals WHERE status='OPEN'")
@@ -75,13 +72,11 @@ def export(symbol):
 
     win_rate = round(wins / closed * 100, 1) if closed else 0.0
 
-    # Equity curve: +1 primary WIN / -1 primary LOSS, cumulative
-    cur.execute("""
-        SELECT status FROM signals
-        WHERE (trade_num=1 OR trade_num IS NULL)
-          AND status IN ('WIN','LOSS')
-        ORDER BY id ASC
-    """)
+    # Equity curve: +1 WIN / -1 LOSS, cumulative
+    cur.execute(
+        "SELECT status FROM signals "
+        "WHERE status IN ('WIN','LOSS') ORDER BY id ASC"
+    )
     equity  = []
     running = 0
     for row in cur.fetchall():
