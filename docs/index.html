@@ -401,8 +401,11 @@ function loadPair(slug){
 }
 
 const sel=document.getElementById("pairSelect");
-sel.addEventListener("change",()=>loadPair(sel.value));
-loadPair(sel.value);
+let _currentPair = sel.value;
+sel.addEventListener("change",()=>{ _currentPair=sel.value; loadPair(_currentPair); });
+loadPair(_currentPair);
+// Auto-refresh every 5 minutes so the page stays current without a manual reload
+setInterval(()=>loadPair(_currentPair), 5*60*1000);
 </script>
 </body>
 </html>

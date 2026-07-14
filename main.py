@@ -93,29 +93,34 @@ def check_open_signals(symbol, db, timeframes):
                         hit, close_price = "TP1_HIT", s["tp"]; break
 
         if hit == "TP1_HIT":
-            # Transition: not yet closed — move SL to entry, target TP2
-            storage.set_tp1_hit(db, s["id"])
-            discord_poster.post_tp1_hit(
-                s["id"], s["direction"], s["entry"], s.get("tp2"), symbol=symbol)
-            print(f"[{symbol}] Signal #{s['id']} -> TP1 HIT! SL now at entry "
-                  f"{s['entry']}, targeting TP2 {s.get('tp2')}")
+            # Transition: not yet closed — move SL to entry, target TP2.
+            # Only post Discord if this run was the one that changed the row
+            # (prevents duplicate alerts when two CI runs overlap).
+            if storage.set_tp1_hit(db, s["id"]):
+                discord_poster.post_tp1_hit(
+                    s["id"], s["direction"], s["entry"], s.get("tp2"), symbol=symbol)
+                print(f"[{symbol}] Signal #{s['id']} -> TP1 HIT! SL now at entry "
+                      f"{s['entry']}, targeting TP2 {s.get('tp2')}")
 
         elif hit in ("WIN", "LOSS", "BREAKEVEN"):
-            storage.close_signal(db, s["id"], hit, close_price)
-            if hit != "BREAKEVEN":
-                learner.update_weights(
-                    db, s["contributors"], s["direction"], won=(hit == "WIN"))
-            new_bal, pnl = storage.record_demo_trade(
-                db, s["id"], s["direction"], hit,
-                entry=s["entry"], sl=s["sl"], close_price=close_price)
-            discord_poster.post_result(
-                s["id"], s["direction"], hit, s["entry"], close_price,
-                storage.stats(db), symbol=symbol,
-                pnl=pnl, new_balance=new_bal,
-            )
-            pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"${pnl:.2f}"
-            print(f"[{symbol}] Signal #{s['id']} -> {hit} @ {close_price} "
-                  f"| Demo P&L {pnl_str} | Balance ${new_bal:.2f}")
+            # close_signal returns False if another run already closed it — skip Discord.
+            if storage.close_signal(db, s["id"], hit, close_price):
+                if hit != "BREAKEVEN":
+                    learner.update_weights(
+                        db, s["contributors"], s["direction"], won=(hit == "WIN"))
+                new_bal, pnl = storage.record_demo_trade(
+                    db, s["id"], s["direction"], hit,
+                    entry=s["entry"], sl=s["sl"], close_price=close_price)
+                discord_poster.post_result(
+                    s["id"], s["direction"], hit, s["entry"], close_price,
+                    storage.stats(db), symbol=symbol,
+                    pnl=pnl, new_balance=new_bal,
+                )
+                pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"${pnl:.2f}"
+                print(f"[{symbol}] Signal #{s['id']} -> {hit} @ {close_price} "
+                      f"| Demo P&L {pnl_str} | Balance ${new_bal:.2f}")
+            else:
+                print(f"[{symbol}] Signal #{s['id']} already closed by another run; skipping.")
 
 
 def try_new_signal(symbol, db, timeframes):

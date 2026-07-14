@@ -236,27 +236,34 @@ def open_signals(db) -> list:
     ]
 
 
-def set_tp1_hit(db, signal_id: int):
-    """Transition signal to TP1_HIT: TP1 reached, SL moves to entry, targeting TP2."""
+def set_tp1_hit(db, signal_id: int) -> bool:
+    """Transition signal to TP1_HIT. Returns True only if this call changed the row."""
     con = _conn(db)
     cur = con.cursor()
     cur.execute(
-        "UPDATE signals SET status='TP1_HIT', tp1_hit_at=? WHERE id=?",
+        "UPDATE signals SET status='TP1_HIT', tp1_hit_at=? WHERE id=? AND status='OPEN'",
         (datetime.now(timezone.utc).isoformat(), signal_id),
     )
+    changed = cur.rowcount > 0
     con.commit()
     con.close()
+    return changed
 
 
-def close_signal(db, signal_id, status, close_price):
+def close_signal(db, signal_id, status, close_price) -> bool:
+    """Close a signal. Returns True only if this call actually changed the row
+    (guards against two concurrent runs processing the same signal)."""
     con = _conn(db)
     cur = con.cursor()
     cur.execute(
-        "UPDATE signals SET status=?, closed_at=?, close_price=? WHERE id=?",
+        "UPDATE signals SET status=?, closed_at=?, close_price=? "
+        "WHERE id=? AND status IN ('OPEN','TP1_HIT')",
         (status, datetime.now(timezone.utc).isoformat(), close_price, signal_id),
     )
+    changed = cur.rowcount > 0
     con.commit()
     con.close()
+    return changed
 
 
 def has_open_signal(db) -> bool:
