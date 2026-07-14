@@ -78,7 +78,9 @@ PRIMARY_TF = "1h"
 
 # --- Demo account ---
 DEMO_INITIAL_BALANCE = 100.0   # starting balance in USD
-DEMO_RISK_PER_TRADE  = 2.0     # fixed USD risked per trade (2% of starting balance)
+DEMO_RISK_PCT        = 0.02    # risk 2% of current balance per trade (compounds with account)
+# Derived: what $2 risk means at the starting balance — used only as a fallback/display default
+DEMO_RISK_PER_TRADE  = round(DEMO_INITIAL_BALANCE * DEMO_RISK_PCT, 2)  # $2.00
 
 # --- Learning ---
 # Starting weight for every technique

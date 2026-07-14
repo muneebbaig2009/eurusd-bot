@@ -51,38 +51,43 @@ def init_db(db):
             status        TEXT NOT NULL,
             pnl           REAL NOT NULL,
             balance_after REAL NOT NULL,
+            risk_amount   REAL,
             closed_at     TEXT
         )
     """)
     con.commit()
-    # Migration for older databases
-    existing = {row[1] for row in cur.execute("PRAGMA table_info(signals)").fetchall()}
+    # Migrations for older databases
+    existing_sig = {row[1] for row in cur.execute("PRAGMA table_info(signals)").fetchall()}
     for col, coltype in [
         ("tp1", "REAL"), ("tp2", "REAL"), ("confidence", "INTEGER"),
         ("rr", "REAL"), ("trend_strength", "INTEGER"), ("timeframe", "TEXT"),
         ("tp1_hit_at", "TEXT"),
     ]:
-        if col not in existing:
+        if col not in existing_sig:
             cur.execute(f"ALTER TABLE signals ADD COLUMN {col} {coltype}")
+    existing_da = {row[1] for row in cur.execute("PRAGMA table_info(demo_account)").fetchall()}
+    if "risk_amount" not in existing_da:
+        cur.execute(f"ALTER TABLE demo_account ADD COLUMN risk_amount REAL DEFAULT {config.DEMO_RISK_PER_TRADE}")
     con.commit()
     con.close()
     _backfill_demo(db)
 
 
-def _calc_demo_pnl(status: str, entry: float, sl: float, close_price: float) -> float:
-    """P&L based on actual pip movement vs SL distance, scaled to fixed risk.
+def _calc_demo_pnl(status: str, entry: float, sl: float, close_price: float,
+                   risk_amount: float) -> float:
+    """P&L scaled to risk_amount (= balance × DEMO_RISK_PCT at trade open time).
 
     BREAKEVEN: price returned to entry after TP1 — always $0.
-    WIN:  profit = risk × |close − entry| / |entry − sl|  (TP pip value)
-    LOSS: loss   = −risk × |close − entry| / |entry − sl| (usually exactly −risk)
+    WIN:  profit = risk × |close − entry| / |entry − sl|
+    LOSS: loss   = −risk (SL distance = 1R by construction)
     """
     if status == "BREAKEVEN":
         return 0.0
     sl_dist = abs(entry - sl)
     if sl_dist <= 0:
-        return config.DEMO_RISK_PER_TRADE if status == "WIN" else -config.DEMO_RISK_PER_TRADE
+        return round(risk_amount, 2) if status == "WIN" else round(-risk_amount, 2)
     price_move = abs(close_price - entry)
-    raw = config.DEMO_RISK_PER_TRADE * (price_move / sl_dist)
+    raw = risk_amount * (price_move / sl_dist)
     return round(raw, 2) if status == "WIN" else round(-raw, 2)
 
 
@@ -103,36 +108,40 @@ def _backfill_demo(db):
         row = cur.fetchone()
         balance = row[0] if row else config.DEMO_INITIAL_BALANCE
         for sig_id, direction, status, entry, sl, close_price, closed_at in missing:
-            pnl = _calc_demo_pnl(status, entry or 0, sl or 0, close_price or 0)
+            risk_amount = round(balance * config.DEMO_RISK_PCT, 2)
+            pnl = _calc_demo_pnl(status, entry or 0, sl or 0, close_price or 0, risk_amount)
             balance = round(balance + pnl, 2)
             cur.execute("""
                 INSERT OR IGNORE INTO demo_account
-                    (signal_id, direction, status, pnl, balance_after, closed_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (sig_id, direction, status, pnl, balance, closed_at))
+                    (signal_id, direction, status, pnl, balance_after, risk_amount, closed_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (sig_id, direction, status, pnl, balance, risk_amount, closed_at))
         con.commit()
     con.close()
 
 
 def record_demo_trade(db, signal_id: int, direction: str, status: str,
                       entry: float, sl: float, close_price: float):
-    """Record P&L for a freshly closed trade using actual price levels.
+    """Record P&L for a freshly closed trade.
+    Risk = DEMO_RISK_PCT % of the balance at the moment the trade closes.
     Returns (new_balance, pnl)."""
-    pnl = _calc_demo_pnl(status, entry, sl, close_price)
     con = _conn(db)
     cur = con.cursor()
     cur.execute("SELECT balance_after FROM demo_account ORDER BY id DESC LIMIT 1")
     row = cur.fetchone()
-    balance = round((row[0] if row else config.DEMO_INITIAL_BALANCE) + pnl, 2)
+    prev_balance = row[0] if row else config.DEMO_INITIAL_BALANCE
+    risk_amount = round(prev_balance * config.DEMO_RISK_PCT, 2)
+    pnl = _calc_demo_pnl(status, entry, sl, close_price, risk_amount)
+    new_balance = round(prev_balance + pnl, 2)
     cur.execute("""
         INSERT OR IGNORE INTO demo_account
-            (signal_id, direction, status, pnl, balance_after, closed_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (signal_id, direction, status, pnl, balance,
+            (signal_id, direction, status, pnl, balance_after, risk_amount, closed_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (signal_id, direction, status, pnl, new_balance, risk_amount,
           datetime.now(timezone.utc).isoformat()))
     con.commit()
     con.close()
-    return balance, pnl
+    return new_balance, pnl
 
 
 def get_demo_stats(db) -> dict:
@@ -151,12 +160,15 @@ def get_demo_stats(db) -> dict:
     balance = last[0] if last else config.DEMO_INITIAL_BALANCE
     pnl_total = round(balance - config.DEMO_INITIAL_BALANCE, 2)
     return_pct = round((balance / config.DEMO_INITIAL_BALANCE - 1) * 100, 1)
+    # Current risk is always a % of the live balance (compounds as account grows)
+    current_risk = round(balance * config.DEMO_RISK_PCT, 2)
     return {
         "initial_balance": config.DEMO_INITIAL_BALANCE,
         "balance": balance,
         "pnl_total": pnl_total,
         "return_pct": return_pct,
-        "risk_per_trade": config.DEMO_RISK_PER_TRADE,
+        "risk_pct": config.DEMO_RISK_PCT * 100,
+        "risk_per_trade": current_risk,
         "balance_history": [config.DEMO_INITIAL_BALANCE] + history,
         "per_signal_pnl": per_signal,
     }

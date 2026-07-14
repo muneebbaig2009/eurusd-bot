@@ -15,12 +15,12 @@ def _send(embed: dict):
     resp.raise_for_status()
 
 
-def _pip_pnl(entry: float, target: float, sl: float) -> float:
-    """Dollar P&L if `target` is hit, scaled so SL distance = DEMO_RISK_PER_TRADE."""
+def _pip_pnl(entry: float, target: float, sl: float, risk_amount: float) -> float:
+    """Dollar P&L if `target` is hit, scaled to risk_amount (= 2% of current balance)."""
     sl_dist = abs(entry - sl)
     if sl_dist <= 0:
         return 0.0
-    return round(config.DEMO_RISK_PER_TRADE * abs(target - entry) / sl_dist, 2)
+    return round(risk_amount * abs(target - entry) / sl_dist, 2)
 
 
 def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
@@ -37,11 +37,11 @@ def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
     sl      = sig["sl"]
     tp1     = sig.get("tp1") or sig["tp"]
     tp2     = sig.get("tp2")
-    risk    = config.DEMO_RISK_PER_TRADE
     balance = demo_balance if demo_balance is not None else config.DEMO_INITIAL_BALANCE
+    risk    = round(balance * config.DEMO_RISK_PCT, 2)
 
-    reward_tp1 = _pip_pnl(entry, tp1, sl)
-    reward_tp2 = _pip_pnl(entry, tp2, sl) if tp2 else None
+    reward_tp1 = _pip_pnl(entry, tp1, sl, risk)
+    reward_tp2 = _pip_pnl(entry, tp2, sl, risk) if tp2 else None
 
     tp2_line = f"\nTP2 Reward  `+${reward_tp2:.2f}`" if reward_tp2 is not None else ""
     demo_value = (

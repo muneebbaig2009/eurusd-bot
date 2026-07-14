@@ -148,7 +148,7 @@
   <footer>
     Auto-generated technical signals for education only — not financial advice. Free data may be delayed.
     Win/loss is measured by whether take-profit or stop-loss was reached first.
-    Demo account uses a fixed $<span id="footerRisk">2.00</span> risk per trade starting from $100.00 — for simulation only.
+    Demo account risks <span id="footerRiskPct">2</span>% of current balance per trade (compounds as the account grows) — for simulation only.
   </footer>
 
 <script>
@@ -255,8 +255,8 @@ function render(d){
   const risk    = dm.risk_per_trade != null ? dm.risk_per_trade : 2;
   const balHist = dm.balance_history && dm.balance_history.length>1 ? dm.balance_history : null;
 
-  if(document.getElementById("footerRisk"))
-    document.getElementById("footerRisk").textContent = risk.toFixed(2);
+  if(document.getElementById("footerRiskPct"))
+    document.getElementById("footerRiskPct").textContent = (dm.risk_pct||2).toFixed(0);
 
   const pnlClass  = pnlTot>=0  ? "pos"  : "neg";
   const retClass  = retPct>=0  ? "pos"  : "neg";
@@ -278,7 +278,7 @@ function render(d){
 
   <!-- Demo account -->
   <section>
-    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(starts $100 · $${risk.toFixed(2)} risk/trade)</span></h2>
+    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(starts $${(dm.initial_balance||100).toFixed(2)} · ${(dm.risk_pct||2).toFixed(0)}% risk/trade)</span></h2>
     <div class="stats" style="margin-bottom:16px">
       <div class="stat">
         <div class="label">Balance</div>
@@ -294,9 +294,9 @@ function render(d){
         <div class="value ${retClass} num">${retSign}${retPct.toFixed(1)}%</div>
       </div>
       <div class="stat">
-        <div class="label">Risk / Trade</div>
+        <div class="label">Next Trade Risk</div>
         <div class="value num">$${risk.toFixed(2)}</div>
-        <div class="sublabel">fixed</div>
+        <div class="sublabel">${(dm.risk_pct||2).toFixed(0)}% of balance</div>
       </div>
     </div>
     <div class="panel">
