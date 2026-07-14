@@ -15,9 +15,17 @@ def _send(embed: dict):
     resp.raise_for_status()
 
 
+def _pip_pnl(entry: float, target: float, sl: float) -> float:
+    """Dollar P&L if `target` is hit, scaled so SL distance = DEMO_RISK_PER_TRADE."""
+    sl_dist = abs(entry - sl)
+    if sl_dist <= 0:
+        return 0.0
+    return round(config.DEMO_RISK_PER_TRADE * abs(target - entry) / sl_dist, 2)
+
+
 def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
                 demo_balance: float = None):
-    """Posted when a new signal fires. Includes demo account risk/reward preview."""
+    """Posted when a new signal fires. Shows exact TP1 / TP2 / SL dollar amounts."""
     color = 0x3fb950 if sig["direction"] == "BUY" else 0xf85149
     arrow = "📈" if sig["direction"] == "BUY" else "📉"
     contributors = "  ·  ".join(
@@ -25,27 +33,33 @@ def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
         for t, v in sig["contributors"].items() if v != 0
     )
 
-    rr  = sig.get("rr") or 1.5
+    entry   = sig["entry"]
+    sl      = sig["sl"]
+    tp1     = sig.get("tp1") or sig["tp"]
+    tp2     = sig.get("tp2")
     risk    = config.DEMO_RISK_PER_TRADE
-    reward  = round(risk * rr, 2)
     balance = demo_balance if demo_balance is not None else config.DEMO_INITIAL_BALANCE
 
+    reward_tp1 = _pip_pnl(entry, tp1, sl)
+    reward_tp2 = _pip_pnl(entry, tp2, sl) if tp2 else None
+
+    tp2_line = f"\nTP2 Reward  `+${reward_tp2:.2f}`" if reward_tp2 is not None else ""
     demo_value = (
         f"Balance  **${balance:.2f}**\n"
-        f"Risk (LOSS)  `-${risk:.2f}`\n"
-        f"Reward (WIN)  `+${reward:.2f}`\n"
-        f"R : R  `1 : {rr}`"
+        f"SL Risk  `-${risk:.2f}`\n"
+        f"TP1 Reward  `+${reward_tp1:.2f}`"
+        f"{tp2_line}"
     )
 
     embed = {
         "title": f"{arrow} {sig['direction']} {symbol}  (#{signal_id})",
         "color": color,
         "fields": [
-            {"name": "Entry",          "value": f"`{sig['entry']}`",                   "inline": True},
-            {"name": "Stop Loss",      "value": f"`{sig['sl']}`",                      "inline": True},
+            {"name": "Entry",          "value": f"`{entry}`",                          "inline": True},
+            {"name": "Stop Loss",      "value": f"`{sl}`",                             "inline": True},
             {"name": "Timeframe",      "value": f"`{sig.get('timeframe','1h')}`",       "inline": True},
-            {"name": "Take Profit 1",  "value": f"`{sig.get('tp1', sig['tp'])}`",       "inline": True},
-            {"name": "Take Profit 2",  "value": f"`{sig.get('tp2','—')}`",              "inline": True},
+            {"name": "Take Profit 1",  "value": f"`{tp1}`",                            "inline": True},
+            {"name": "Take Profit 2",  "value": f"`{tp2 or '—'}`",                     "inline": True},
             {"name": "Risk : Reward",  "value": f"`1 : {sig.get('rr','—')}`",           "inline": True},
             {"name": "Confidence",     "value": f"`{sig.get('confidence','—')}%`",      "inline": True},
             {"name": "Trend Strength", "value": f"`{sig.get('trend_strength','—')}/100`","inline": True},

@@ -107,7 +107,7 @@
       "trend_strength": 28,
       "timeframe": "1h",
       "pnl": -2.0,
-      "balance_after": 116.0
+      "balance_after": 116.03
     },
     {
       "id": 36,
@@ -134,7 +134,7 @@
       "trend_strength": 29,
       "timeframe": "1h",
       "pnl": -2.0,
-      "balance_after": 118.0
+      "balance_after": 118.03
     },
     {
       "id": 35,
@@ -161,7 +161,7 @@
       "trend_strength": 29,
       "timeframe": "1h",
       "pnl": -2.0,
-      "balance_after": 120.0
+      "balance_after": 120.03
     },
     {
       "id": 34,
@@ -188,7 +188,7 @@
       "trend_strength": 29,
       "timeframe": "1h",
       "pnl": -2.0,
-      "balance_after": 122.0
+      "balance_after": 122.03
     },
     {
       "id": 33,
@@ -215,7 +215,7 @@
       "trend_strength": 29,
       "timeframe": "1h",
       "pnl": -2.0,
-      "balance_after": 124.0
+      "balance_after": 124.03
     },
     {
       "id": 32,
@@ -241,8 +241,8 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 126.0
+      "pnl": 3.01,
+      "balance_after": 126.03
     },
     {
       "id": 31,
@@ -268,8 +268,8 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 123.0
+      "pnl": 3.01,
+      "balance_after": 123.02
     },
     {
       "id": 30,
@@ -295,8 +295,8 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 120.0
+      "pnl": 3.01,
+      "balance_after": 120.01
     },
     {
       "id": 29,
@@ -322,7 +322,7 @@
       "rr": 1.5,
       "trend_strength": 33,
       "timeframe": "1h",
-      "pnl": 3.0,
+      "pnl": 2.99,
       "balance_after": 117.0
     },
     {
@@ -350,7 +350,7 @@
       "trend_strength": 32,
       "timeframe": "1h",
       "pnl": 3.0,
-      "balance_after": 114.0
+      "balance_after": 114.01
     },
     {
       "id": 27,
@@ -377,7 +377,7 @@
       "trend_strength": 40,
       "timeframe": "1h",
       "pnl": -2.0,
-      "balance_after": 111.0
+      "balance_after": 111.01
     },
     {
       "id": 26,
@@ -403,8 +403,8 @@
       "rr": 1.5,
       "trend_strength": 37,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 113.0
+      "pnl": 3.01,
+      "balance_after": 113.01
     },
     {
       "id": 25,
@@ -619,7 +619,7 @@
       "rr": 1.5,
       "trend_strength": 31,
       "timeframe": "1h",
-      "pnl": 3.0,
+      "pnl": 3.01,
       "balance_after": 99.0
     },
     {
@@ -646,8 +646,8 @@
       "rr": 1.5,
       "trend_strength": 31,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 96.0
+      "pnl": 3.01,
+      "balance_after": 95.99
     },
     {
       "id": 16,
@@ -673,8 +673,8 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 93.0
+      "pnl": 2.99,
+      "balance_after": 92.98
     },
     {
       "id": 15,
@@ -700,8 +700,8 @@
       "rr": 1.5,
       "trend_strength": 29,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 90.0
+      "pnl": 2.99,
+      "balance_after": 89.99
     },
     {
       "id": 14,
@@ -1084,8 +1084,8 @@
   ],
   "demo": {
     "initial_balance": 100.0,
-    "balance": 116.0,
-    "pnl_total": 16.0,
+    "balance": 116.03,
+    "pnl_total": 16.03,
     "return_pct": 16.0,
     "risk_per_trade": 2.0,
     "balance_history": [
@@ -1104,9 +1104,9 @@
       81.0,
       84.0,
       87.0,
-      90.0,
-      93.0,
-      96.0,
+      89.99,
+      92.98,
+      95.99,
       99.0,
       102.0,
       105.0,
@@ -1115,18 +1115,18 @@
       104.0,
       107.0,
       110.0,
-      113.0,
-      111.0,
-      114.0,
+      113.01,
+      111.01,
+      114.01,
       117.0,
-      120.0,
-      123.0,
-      126.0,
-      124.0,
-      122.0,
-      120.0,
-      118.0,
-      116.0
+      120.01,
+      123.02,
+      126.03,
+      124.03,
+      122.03,
+      120.03,
+      118.03,
+      116.03
     ],
     "per_signal_pnl": {}
   }

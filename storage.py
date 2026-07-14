@@ -68,12 +68,28 @@ def init_db(db):
     _backfill_demo(db)
 
 
+def _calc_demo_pnl(status: str, entry: float, sl: float, close_price: float) -> float:
+    """P&L based on actual pip movement vs SL distance, scaled to fixed risk.
+
+    Risk is always DEMO_RISK_PER_TRADE dollars (the SL distance = 1R).
+    WIN: profit = risk × |close − entry| / |entry − sl|  (exact TP pip value)
+    LOSS: loss  = −risk × |close − entry| / |entry − sl| (usually exactly −risk)
+    """
+    sl_dist = abs(entry - sl)
+    if sl_dist <= 0:
+        # Fallback: flat risk amount
+        return config.DEMO_RISK_PER_TRADE if status == "WIN" else -config.DEMO_RISK_PER_TRADE
+    price_move = abs(close_price - entry)
+    raw = config.DEMO_RISK_PER_TRADE * (price_move / sl_dist)
+    return round(raw, 2) if status == "WIN" else round(-raw, 2)
+
+
 def _backfill_demo(db):
     """Back-fill demo_account rows for any closed signals not yet recorded."""
     con = _conn(db)
     cur = con.cursor()
     cur.execute("""
-        SELECT s.id, s.direction, s.status, s.rr, s.closed_at
+        SELECT s.id, s.direction, s.status, s.entry, s.sl, s.close_price, s.closed_at
         FROM signals s
         WHERE s.status IN ('WIN','LOSS')
           AND s.id NOT IN (SELECT signal_id FROM demo_account)
@@ -84,10 +100,8 @@ def _backfill_demo(db):
         cur.execute("SELECT balance_after FROM demo_account ORDER BY id DESC LIMIT 1")
         row = cur.fetchone()
         balance = row[0] if row else config.DEMO_INITIAL_BALANCE
-        for sig_id, direction, status, rr, closed_at in missing:
-            rr = rr if rr else 1.5
-            pnl = round(config.DEMO_RISK_PER_TRADE * rr, 2) if status == "WIN" \
-                  else -config.DEMO_RISK_PER_TRADE
+        for sig_id, direction, status, entry, sl, close_price, closed_at in missing:
+            pnl = _calc_demo_pnl(status, entry or 0, sl or 0, close_price or 0)
             balance = round(balance + pnl, 2)
             cur.execute("""
                 INSERT OR IGNORE INTO demo_account
@@ -98,11 +112,11 @@ def _backfill_demo(db):
     con.close()
 
 
-def record_demo_trade(db, signal_id: int, direction: str, status: str, rr):
-    """Record P&L for a freshly closed trade and return (new_balance, pnl)."""
-    rr = rr if rr else 1.5
-    pnl = round(config.DEMO_RISK_PER_TRADE * rr, 2) if status == "WIN" \
-          else -config.DEMO_RISK_PER_TRADE
+def record_demo_trade(db, signal_id: int, direction: str, status: str,
+                      entry: float, sl: float, close_price: float):
+    """Record P&L for a freshly closed trade using actual price levels.
+    Returns (new_balance, pnl)."""
+    pnl = _calc_demo_pnl(status, entry, sl, close_price)
     con = _conn(db)
     cur = con.cursor()
     cur.execute("SELECT balance_after FROM demo_account ORDER BY id DESC LIMIT 1")

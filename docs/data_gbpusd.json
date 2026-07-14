@@ -80,8 +80,8 @@
       "rr": 1.5,
       "trend_strength": 22,
       "timeframe": "1h",
-      "pnl": 3.0,
-      "balance_after": 83.0
+      "pnl": 2.99,
+      "balance_after": 82.99
     },
     {
       "id": 10,
@@ -356,8 +356,8 @@
   ],
   "demo": {
     "initial_balance": 100.0,
-    "balance": 83.0,
-    "pnl_total": -17.0,
+    "balance": 82.99,
+    "pnl_total": -17.01,
     "return_pct": -17.0,
     "risk_per_trade": 2.0,
     "balance_history": [
@@ -372,7 +372,7 @@
       84.0,
       82.0,
       80.0,
-      83.0
+      82.99
     ],
     "per_signal_pnl": {}
   }

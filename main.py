@@ -68,7 +68,8 @@ def check_open_signals(symbol, db, timeframes):
             storage.close_signal(db, s["id"], hit, close_price)
             learner.update_weights(db, s["contributors"], s["direction"], won=(hit == "WIN"))
             new_bal, pnl = storage.record_demo_trade(
-                db, s["id"], s["direction"], hit, s.get("rr"))
+                db, s["id"], s["direction"], hit,
+                entry=s["entry"], sl=s["sl"], close_price=close_price)
             discord_poster.post_result(
                 s["id"], s["direction"], hit, s["entry"], close_price,
                 storage.stats(db), symbol=symbol,
