@@ -40,9 +40,13 @@ def main():
     print("Signal:", sig)
 
     if sig:
-        sid = storage.log_signal(TEST_DB, sig)
-        print("Logged id:", sid, "| weights before:", storage.all_weights(TEST_DB))
-        storage.close_signal(TEST_DB, sid, "WIN", sig["tp"])
+        sig["lot_size"] = storage.calc_lot_size(
+            config.DEMO_INITIAL_BALANCE, sig["entry"], sig["sl"],
+            risk_pct=config.DEMO_RISK_PCT / 2)
+        id1, id2 = storage.log_signal_pair(TEST_DB, sig)
+        print("Logged pair:", id1, id2, "| weights before:", storage.all_weights(TEST_DB))
+        storage.close_signal(TEST_DB, id1, "WIN", sig["tp1"] or sig["tp"])
+        storage.close_signal(TEST_DB, id2, "WIN", sig["tp2"] or sig["tp"]) if id2 else None
         learner.update_weights(TEST_DB, sig["contributors"], sig["direction"], won=True)
         print("Weights after WIN:", storage.all_weights(TEST_DB))
         print("Stats:", storage.stats(TEST_DB))

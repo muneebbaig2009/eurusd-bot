@@ -111,6 +111,10 @@
   .pill.WIN{color:var(--buy);background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3)}
   .pill.LOSS{color:var(--sell);background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3)}
   .pill.OPEN{color:var(--accent);background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3)}
+  .pill.BREAKEVEN{color:#a5a5ff;background:rgba(165,165,255,.12);border:1px solid rgba(165,165,255,.3)}
+  .pill.t1{color:#58a6ff;background:rgba(88,166,255,.10);border:1px solid rgba(88,166,255,.25);font-size:10px}
+  .pill.t2{color:#bc8cff;background:rgba(188,140,255,.10);border:1px solid rgba(188,140,255,.25);font-size:10px}
+  .row-t2 td{background:rgba(188,140,255,.04)}
   .lots{color:var(--accent);font-size:12px;font-weight:600}
   .num{font-variant-numeric:tabular-nums}
   .muted{color:var(--muted)}
@@ -146,8 +150,9 @@
 
   <footer>
     Auto-generated technical signals for education only — not financial advice. Free data may be delayed.
-    Signals are designed for MetaTrader 5. Win/loss is measured by whether TP or SL is reached first.
-    Demo account risks <span id="footerRiskPct">2</span>% of balance per trade; lot size is calculated per signal — for simulation only.
+    Signals are designed for MetaTrader 5. Each signal opens 2 trades: T1 targets TP1, T2 targets TP2.
+    When TP1 is hit, T1 closes WIN and T2's SL moves to entry (breakeven). T2 then targets TP2 or closes at B/E.
+    If SL is hit before TP1, both trades close as LOSS. Total risk = <span id="footerRiskPct">2</span>% per signal (1% per trade). Win rate counts T1 outcomes only.
   </footer>
 
 <script>
@@ -266,17 +271,17 @@ function render(d){
   <!-- Signal stats -->
   <section>
     <div class="stats">
-      <div class="stat"><div class="label">Total Signals</div><div class="value num">${s.total}</div></div>
-      <div class="stat"><div class="label">Wins</div><div class="value win num">${s.wins}</div></div>
-      <div class="stat"><div class="label">Losses</div><div class="value loss num">${s.losses}</div></div>
+      <div class="stat"><div class="label">Total Rows</div><div class="value num">${s.total}</div><div class="sublabel">2 trades / signal</div></div>
+      <div class="stat"><div class="label">T1 Wins</div><div class="value win num">${s.wins}</div><div class="sublabel">TP1 reached</div></div>
+      <div class="stat"><div class="label">T1 Losses</div><div class="value loss num">${s.losses}</div><div class="sublabel">SL before TP1</div></div>
       <div class="stat"><div class="label">Open</div><div class="value num">${s.open}</div></div>
-      <div class="stat"><div class="label">Win Rate</div><div class="value num">${s.win_rate}%</div></div>
+      <div class="stat"><div class="label">Win Rate</div><div class="value num">${s.win_rate}%</div><div class="sublabel">T1 signals</div></div>
     </div>
   </section>
 
   <!-- Demo account -->
   <section>
-    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(MT5 · starts $${(dm.initial_balance||100).toFixed(2)} · ${(dm.risk_pct||2).toFixed(0)}% risk/trade)</span></h2>
+    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(MT5 · dual-trade · starts $${(dm.initial_balance||100).toFixed(2)})</span></h2>
     <div class="stats" style="margin-bottom:16px">
       <div class="stat">
         <div class="label">Balance</div>
@@ -292,9 +297,9 @@ function render(d){
         <div class="value ${retClass} num">${retSign}${retPct.toFixed(1)}%</div>
       </div>
       <div class="stat">
-        <div class="label">Risk / Trade</div>
+        <div class="label">Risk / Signal</div>
         <div class="value num">${(dm.risk_pct||2).toFixed(0)}%</div>
-        <div class="sublabel">of balance · $${risk.toFixed(2)} next</div>
+        <div class="sublabel">1% per trade × 2 trades</div>
       </div>
     </div>
     <div class="panel">
@@ -332,29 +337,38 @@ function render(d){
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>#</th><th>Time</th><th>Side</th><th>TF</th><th>Entry</th>
-          <th>SL</th><th>TP</th><th>Lots</th><th>R:R</th><th>Conf</th>
+          <th>#</th><th>Trd</th><th>Time</th><th>Side</th><th>TF</th><th>Entry</th>
+          <th>SL</th><th>Target</th><th>Lots</th><th>R:R</th><th>Conf</th>
           <th>Status</th><th>Closed</th><th>P&amp;L</th><th>Balance</th><th>Reasons</th>
         </tr></thead>
         <tbody>
           ${d.signals.map(sig=>{
             const PIP=0.0001;
-            const tp=sig.tp1||sig.tp;
-            const slPips=sig.sl?((Math.abs(sig.entry-sig.sl)/PIP).toFixed(1)):"—";
-            const tpPips=tp?((Math.abs(sig.entry-tp)/PIP).toFixed(1)):"—";
+            const tNum   = sig.trade_num || 1;
+            const isT2   = tNum === 2;
+            const rowCls = isT2 ? "row-t2" : "";
+            const tBadge = isT2
+              ? '<span class="pill t2">T2</span>'
+              : (sig.pair_id ? '<span class="pill t1">T1</span>' : '<span class="muted" style="font-size:11px">—</span>');
+            // T1: use tp1 (the target it monitors); T2: use tp (which is tp2)
+            const target = sig.tp;
+            const slPips = sig.sl ? (Math.abs(sig.entry - sig.sl)/PIP).toFixed(1) : "—";
+            const tpPips = target ? (Math.abs(sig.entry - target)/PIP).toFixed(1) : "—";
+            const statusLabel = sig.status === "BREAKEVEN" ? "B/E" : sig.status;
             return `
-            <tr>
+            <tr class="${rowCls}">
               <td class="muted num">${sig.id}</td>
+              <td>${tBadge}</td>
               <td class="muted">${timeAgo(sig.created_at)}</td>
               <td><span class="pill ${sig.direction}">${sig.direction}</span></td>
               <td class="muted">${sig.timeframe||"—"}</td>
               <td class="num">${fmt(sig.entry)}</td>
               <td class="num" title="${slPips} pips">${fmt(sig.sl)}</td>
-              <td class="num" title="${tpPips} pips">${tp?fmt(tp):"—"}</td>
+              <td class="num" title="${tpPips} pips">${target?fmt(target):"—"}</td>
               <td class="lots num">${sig.lot_size!=null?sig.lot_size+"L":"—"}</td>
               <td class="num muted">${sig.rr?("1:"+sig.rr):"—"}</td>
               <td class="num">${sig.confidence!=null?sig.confidence+"%":"—"}</td>
-              <td><span class="pill ${sig.status}">${sig.status}</span></td>
+              <td><span class="pill ${sig.status}">${statusLabel}</span></td>
               <td class="num muted">${sig.close_price?fmt(sig.close_price):"—"}</td>
               <td class="num">${pnlHtml(sig.pnl)}</td>
               <td class="num muted">${sig.balance_after!=null?"$"+sig.balance_after.toFixed(2):"—"}</td>

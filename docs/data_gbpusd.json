@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-07-14T14:39:01.228488+00:00",
-  "symbol": "GBP/USD",
+  "updated_at": "2026-07-14T14:56:06.597743+00:00",
+  "symbol": "gbpusd",
   "stats": {
     "wins": 1,
     "losses": 10,
@@ -60,19 +60,6 @@
       "9": -1.37,
       "10": -1.35,
       "11": 2.68
-    },
-    "per_signal_lot": {
-      "1": 0.01,
-      "2": 0.01,
-      "3": 0.01,
-      "4": 0.01,
-      "5": 0.01,
-      "6": 0.01,
-      "7": 0.01,
-      "8": 0.01,
-      "9": 0.01,
-      "10": 0.01,
-      "11": 0.01
     }
   },
   "signals": [
@@ -101,6 +88,9 @@
       "trend_strength": 23,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": null,
       "balance_after": null
     },
@@ -129,6 +119,9 @@
       "trend_strength": 22,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": 2.68,
       "balance_after": 87.47
     },
@@ -157,6 +150,9 @@
       "trend_strength": 43,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.35,
       "balance_after": 84.79
     },
@@ -185,6 +181,9 @@
       "trend_strength": 41,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.37,
       "balance_after": 86.14
     },
@@ -213,6 +212,9 @@
       "trend_strength": 41,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.36,
       "balance_after": 87.51
     },
@@ -241,6 +243,9 @@
       "trend_strength": 41,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.36,
       "balance_after": 88.87
     },
@@ -269,6 +274,9 @@
       "trend_strength": 41,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.36,
       "balance_after": 90.23
     },
@@ -297,6 +305,9 @@
       "trend_strength": 39,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.39,
       "balance_after": 91.59
     },
@@ -325,6 +336,9 @@
       "trend_strength": 39,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.35,
       "balance_after": 92.98
     },
@@ -353,6 +367,9 @@
       "trend_strength": 19,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.9,
       "balance_after": 94.33
     },
@@ -381,6 +398,9 @@
       "trend_strength": 19,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.9,
       "balance_after": 96.23
     },
@@ -409,6 +429,9 @@
       "trend_strength": 19,
       "timeframe": "1h",
       "lot_size": null,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
       "pnl": -1.87,
       "balance_after": 98.13
     }
