@@ -546,6 +546,7 @@ setInterval(()=>loadPair(_currentPair), 5*60*1000);
 let _discordWebhook  = null;
 let _alertedLow      = false;   // sent "low battery" this discharge cycle
 let _alertedFull     = false;   // sent "battery full" this charge cycle
+let _prevCharging    = null;    // tracks charging state to detect plug/unplug
 
 fetch("discord_config.json?_="+Date.now())
   .then(r=>r.ok?r.json():null)
@@ -564,6 +565,16 @@ function _discordSend(msg){
 function checkBatteryAlerts(battery){
   const pct  = Math.round(battery.level*100);
   const chrg = battery.charging;
+
+  // 🔌 Charger plugged in / removed — send on every state change
+  if(_prevCharging !== null && chrg !== _prevCharging){
+    if(chrg){
+      _discordSend(`🔌 **Charger Plugged In** — Battery at ${pct}%, now charging.`);
+    } else {
+      _discordSend(`🔋 **Charger Removed** — Battery at ${pct}%, now on battery.`);
+    }
+  }
+  _prevCharging = chrg;
 
   // ⚠ Low battery (≤20%, not charging) — send once per discharge
   if(!chrg && pct<=20 && !_alertedLow){
