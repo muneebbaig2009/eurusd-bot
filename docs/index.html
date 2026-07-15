@@ -353,45 +353,7 @@ function render(d){
     <div class="panel"><div class="empty">No MT5 trades yet — they appear here after the bot places and closes orders on your demo account.</div></div>`}
   </section>
 
-  <!-- Signal history -->
-  <section>
-    <h2>Signal History</h2>
-    ${d.signals.length ? `
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>#</th><th>Time</th><th>Side</th><th>TF</th><th>Entry</th>
-          <th>SL</th><th>TP</th><th>Lots</th><th>R:R</th><th>Conf</th>
-          <th>Status</th><th>Closed</th><th>P&amp;L</th><th>Balance</th><th>Reasons</th>
-        </tr></thead>
-        <tbody>
-          ${d.signals.map(sig=>{
-            const PIP=0.0001;
-            const tp     = sig.tp1 || sig.tp;
-            const slPips = sig.sl ? (Math.abs(sig.entry - sig.sl)/PIP).toFixed(1) : "—";
-            const tpPips = tp ? (Math.abs(sig.entry - tp)/PIP).toFixed(1) : "—";
-            return `
-            <tr>
-              <td class="muted num">${sig.id}</td>
-              <td class="muted">${timeAgo(sig.created_at)}</td>
-              <td><span class="pill ${sig.direction}">${sig.direction}</span></td>
-              <td class="muted">${sig.timeframe||"—"}</td>
-              <td class="num">${fmt(sig.entry)}</td>
-              <td class="num" title="${slPips} pips">${fmt(sig.sl)}</td>
-              <td class="num" title="${tpPips} pips">${tp?fmt(tp):"—"}</td>
-              <td class="lots num">${sig.lot_size!=null?sig.lot_size+"L":"—"}</td>
-              <td class="num muted">${sig.rr?("1:"+sig.rr):"—"}</td>
-              <td class="num">${sig.confidence!=null?sig.confidence+"%":"—"}</td>
-              <td><span class="pill ${sig.status}">${sig.status}</span></td>
-              <td class="num muted">${sig.close_price?fmt(sig.close_price):"—"}</td>
-              <td class="num">${pnlHtml(sig.pnl)}</td>
-              <td class="num muted">${sig.balance_after!=null?"$"+sig.balance_after.toFixed(2):"—"}</td>
-              <td class="contrib">${contribHtml(sig.contributors)}</td>
-            </tr>`;}).join("")}
-        </tbody>
-      </table>
-    </div>` : '<div class="empty">No signals yet. The bot posts here after its first qualifying setup.</div>'}
-  </section>`;
+  `;
 
   document.getElementById("root").innerHTML = html;
 
