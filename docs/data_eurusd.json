@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T10:51:57.072119+00:00",
+  "updated_at": "2026-07-15T10:57:00.974363+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -40,12 +40,23 @@
     "leverage": 100,
     "server": "MetaQuotes-Demo"
   },
-  "mt5_trades": [],
+  "mt5_trades": [
+    {
+      "ticket": 9570220998,
+      "time": "2026-07-15T10:52:59+00:00",
+      "symbol": "EURUSD",
+      "type": "SELL",
+      "volume": 0.01,
+      "price": 1.1424,
+      "profit": -0.02,
+      "comment": "eurusd-bot close #9570220639"
+    }
+  ],
   "cycle_status": {
-    "checked_at": "2026-07-15T10:51:56.933432+00:00",
+    "checked_at": "2026-07-15T10:57:00.864976+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14127
+    "current_price": 1.14123
   },
   "signals": []
 }
