@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-15T17:17:04.948518+00:00",
+  "updated_at": "2026-07-15T17:25:03.351962+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
     "losses": 0,
-    "open": 0,
-    "total": 0,
+    "open": 1,
+    "total": 1,
     "win_rate": 0.0
   },
   "weights": {
@@ -53,10 +53,44 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-15T17:17:04.808320+00:00",
-    "signal_result": "no_conditions",
-    "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14494
+    "checked_at": "2026-07-15T17:25:03.344562+00:00",
+    "signal_result": "blocked_open",
+    "reason": "Open position exists \u2014 waiting for it to close",
+    "current_price": 1.14538
   },
-  "signals": []
+  "signals": [
+    {
+      "id": 39,
+      "created_at": "2026-07-15T17:22:09.679342+00:00",
+      "direction": "SELL",
+      "entry": 1.14516,
+      "tp": 1.14346,
+      "sl": 1.14742,
+      "score": -2.8,
+      "contributors": {
+        "rsi": -1,
+        "ma_cross": 0,
+        "macd": 1,
+        "bbands": -1,
+        "ema_trend": 1,
+        "stoch": -1,
+        "supertrend": 1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.14346,
+      "tp2": 1.1412,
+      "confidence": 63,
+      "rr": 0.75,
+      "trend_strength": 24,
+      "timeframe": "1h",
+      "lot_size": 8.84,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
+      "pnl": null,
+      "balance_after": null
+    }
+  ]
 }
