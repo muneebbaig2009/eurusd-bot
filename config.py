@@ -73,6 +73,50 @@ CONFIRM_TIMEFRAMES = ["1h", "1day"]
 # Primary timeframe used for entry price + ATR
 PRIMARY_TF = "1h"
 
+# --- Per-pair strategy overrides ---
+# EUR/USD: backtest-optimised, lower volatility (~30-50 pip/day), tight spreads
+# GBP/USD: ~40% more volatile (~60-90 pip/day), wider spreads, momentum-driven
+#   → wider ATR stops to handle noise, wider TP for momentum moves,
+#     stricter threshold and ADX to filter lower-quality setups
+PAIR_CONFIG = {
+    "EUR/USD": {
+        "SL_ATR_MULT":          2.0,
+        "TP1_ATR_MULT":         1.5,
+        "TP2_ATR_MULT":         3.5,
+        "SIGNAL_THRESHOLD":     1.0,
+        "MIN_CONFIDENCE":       60,
+        "MIN_ADX":              12,
+        "SIGNAL_COOLDOWN_BARS": 4,
+    },
+    "GBP/USD": {
+        "SL_ATR_MULT":          2.5,   # wider: absorbs GBP/USD noise
+        "TP1_ATR_MULT":         2.0,   # wider: captures momentum swings
+        "TP2_ATR_MULT":         4.0,
+        "SIGNAL_THRESHOLD":     1.2,   # stricter: GBP/USD more unpredictable
+        "MIN_CONFIDENCE":       65,    # stricter
+        "MIN_ADX":              15,    # stronger trend required
+        "SIGNAL_COOLDOWN_BARS": 6,     # longer cooldown between signals
+    },
+}
+
+
+def get_pair_config(symbol: str) -> dict:
+    """Return merged strategy parameters for a trading pair."""
+    base = {
+        "SL_ATR_MULT":          SL_ATR_MULT,
+        "TP1_ATR_MULT":         TP1_ATR_MULT,
+        "TP2_ATR_MULT":         TP2_ATR_MULT,
+        "SIGNAL_THRESHOLD":     SIGNAL_THRESHOLD,
+        "MIN_CONFIDENCE":       MIN_CONFIDENCE,
+        "MIN_ADX":              MIN_ADX,
+        "SIGNAL_COOLDOWN_BARS": SIGNAL_COOLDOWN_BARS,
+        "CONF_MIN":             CONF_MIN,
+        "CONF_MAX":             CONF_MAX,
+        "CONFIRM_TIMEFRAMES":   CONFIRM_TIMEFRAMES,
+        "PRIMARY_TF":           PRIMARY_TF,
+    }
+    return {**base, **PAIR_CONFIG.get(symbol, {})}
+
 # --- Demo account ---
 DEMO_INITIAL_BALANCE = 100.0   # starting balance in USD
 DEMO_RISK_PCT        = 0.02    # 2% of balance risked per trade (used to compute lot size)

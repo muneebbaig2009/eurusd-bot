@@ -54,18 +54,21 @@ def try_new_signal(symbol, db, timeframes):
     if storage.has_open_signal(db):
         print(f"[{symbol}] Open signal exists; not generating a new one.")
         return
+
+    pair_cfg = config.get_pair_config(symbol)
+
     last_close = storage.last_close_time(db)
     if last_close is not None:
         now_utc = datetime.now(timezone.utc)
         if last_close.tzinfo is None:
             last_close = last_close.replace(tzinfo=timezone.utc)
         elapsed = (now_utc - last_close).total_seconds() / 3600
-        if elapsed < config.SIGNAL_COOLDOWN_BARS:
-            print(f"[{symbol}] Cooldown active — "
-                  f"{config.SIGNAL_COOLDOWN_BARS - elapsed:.1f}h remaining.")
+        cooldown = pair_cfg["SIGNAL_COOLDOWN_BARS"]
+        if elapsed < cooldown:
+            print(f"[{symbol}] Cooldown active — {cooldown - elapsed:.1f}h remaining.")
             return
 
-    sig = signal_engine.generate_signal(db, timeframes)
+    sig = signal_engine.generate_signal(db, timeframes, cfg=pair_cfg)
     if sig is None:
         print(f"[{symbol}] No valid signal this cycle.")
         return
