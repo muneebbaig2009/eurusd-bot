@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T10:12:32.952396+00:00",
+  "updated_at": "2026-07-15T10:41:49.702260+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
@@ -42,10 +42,10 @@
   },
   "mt5_trades": [],
   "cycle_status": {
-    "checked_at": "2026-07-15T10:12:32.847348+00:00",
+    "checked_at": "2026-07-15T10:41:49.658472+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.33865
+    "current_price": 1.33857
   },
   "signals": []
 }
