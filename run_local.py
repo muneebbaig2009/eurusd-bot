@@ -121,6 +121,8 @@ def main():
     mt5_executor.connect()
     auto_tuner.init_baseline()
 
+    _ipc_failures = 0   # consecutive IPC-failure cycles; triggers auto-reconnect
+
     try:
         while True:
             now = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
@@ -133,12 +135,31 @@ def main():
                 print(f"[tuner] Error: {exc}")
                 traceback.print_exc()
 
+            cycle_had_ipc_error = False
             for symbol in config.PAIRS:
                 try:
                     bot.run_pair(symbol)
                 except Exception as exc:
                     print(f"[{symbol}] Unhandled error: {exc}")
                     traceback.print_exc()
+                    if "IPC send failed" in str(exc) or "IPC" in str(exc):
+                        cycle_had_ipc_error = True
+
+            if cycle_had_ipc_error:
+                _ipc_failures += 1
+                print(f"[MT5] IPC failure #{_ipc_failures} — "
+                      f"{'attempting reconnect...' if _ipc_failures >= 2 else 'will retry next cycle'}")
+                if _ipc_failures >= 2:
+                    try:
+                        mt5_executor.disconnect()
+                        time.sleep(5)
+                        mt5_executor.connect()
+                        _ipc_failures = 0
+                        print("[MT5] Reconnected successfully")
+                    except Exception as exc:
+                        print(f"[MT5] Reconnect failed: {exc}")
+            else:
+                _ipc_failures = 0
 
             _check_battery_alerts()
             _push_dashboard()
