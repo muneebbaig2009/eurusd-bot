@@ -73,14 +73,14 @@ def try_new_signal(symbol, db, timeframes):
         print(f"[{symbol}] No valid signal this cycle.")
         return
 
-    demo_balance = storage.get_demo_stats(db)["balance"]
-    sig["lot_size"] = storage.calc_lot_size(demo_balance, sig["entry"], sig["sl"])
-    sid = storage.log_signal(db, sig)
-    discord_poster.post_signal(sig, sid, symbol=symbol, demo_balance=demo_balance)
-    print(f"[{symbol}] Posted #{sid}: {sig['direction']} @ {sig['entry']} "
-          f"| Lots {sig['lot_size']} (conf {sig['confidence']}%, R:R 1:{sig['rr']})")
-
     import mt5_executor
+    acct    = mt5_executor.get_account_info()
+    balance = acct.get("balance", config.DEMO_INITIAL_BALANCE) if acct else config.DEMO_INITIAL_BALANCE
+    sig["lot_size"] = storage.calc_lot_size(balance, sig["entry"], sig["sl"])
+    sid = storage.log_signal(db, sig)
+    discord_poster.post_signal(sig, sid, symbol=symbol, demo_balance=balance)
+    print(f"[{symbol}] Posted #{sid}: {sig['direction']} @ {sig['entry']} "
+          f"| Lots {sig['lot_size']} (2% of ${balance:,.2f}, conf {sig['confidence']}%, R:R 1:{sig['rr']})")
     tp = sig.get("tp1") or sig["tp"]
     ticket = mt5_executor.open_trade(
         symbol, sig["direction"], sig["lot_size"],
