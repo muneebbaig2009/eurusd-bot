@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T18:54:48.137493+00:00",
+  "updated_at": "2026-07-15T18:59:46.603192+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -34,15 +34,38 @@
       "39": 0.0
     }
   },
-  "mt5_account": {},
-  "mt5_trades": [],
+  "mt5_account": {
+    "login": 109677040,
+    "balance": 100000.0,
+    "equity": 100000.0,
+    "profit": 0.0,
+    "margin": 0.0,
+    "free_margin": 100000.0,
+    "currency": "USD",
+    "leverage": 100,
+    "server": "MetaQuotes-Demo"
+  },
+  "mt5_trades": [
+    {
+      "ticket": 9570220998,
+      "time": "2026-07-15T10:52:59+00:00",
+      "symbol": "EURUSD",
+      "type": "SELL",
+      "volume": 0.01,
+      "price": 1.1424,
+      "profit": -0.02,
+      "comment": "eurusd-bot close #9570220639"
+    }
+  ],
   "cycle_status": {
-    "checked_at": "2026-07-15T18:54:48.133130+00:00",
-    "signal_result": "data_error",
-    "reason": "MT5 data fetch failed: MT5: no candle data for EURUSD 5min. Error: (-10001, 'IPC send failed')"
+    "checked_at": "2026-07-15T18:59:46.574730+00:00",
+    "signal_result": "blocked_cooldown",
+    "cooldown_remaining_h": 2.8,
+    "reason": "Cooldown: 2.8h remaining after last close",
+    "current_price": 1.1466
   },
   "laptop_battery": {
-    "percent": 63,
+    "percent": 67,
     "charging": true,
     "secsleft": null
   },
