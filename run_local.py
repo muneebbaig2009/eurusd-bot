@@ -18,9 +18,69 @@ from datetime import datetime, timezone
 import config
 import mt5_executor
 import auto_tuner
+import discord_poster
 import main as bot
 
 CYCLE_SECONDS = 5 * 60    # 5-minute cadence for realistic live signal tracking
+
+# Battery alert state (persists across cycles; resets only when process restarts)
+_prev_charging = None
+_alerted_low   = False
+_alerted_full  = False
+
+
+def _check_battery_alerts():
+    """Send Discord alerts for charging state changes, low battery, and full battery."""
+    global _prev_charging, _alerted_low, _alerted_full
+    try:
+        import psutil
+        bat = psutil.sensors_battery()
+        if bat is None:
+            return
+        pct      = round(bat.percent, 1)
+        charging = bat.power_plugged
+
+        if _prev_charging is not None and charging != _prev_charging:
+            if charging:
+                discord_poster._send({
+                    "title":       f"\U0001f50c Charger Plugged In — {pct:.0f}%",
+                    "description": "Laptop is now charging.",
+                    "color":       0x5865f2,
+                    "fields":      [],
+                })
+            else:
+                discord_poster._send({
+                    "title":       f"\U0001f50b Charger Removed — {pct:.0f}%",
+                    "description": "Laptop is now on battery.",
+                    "color":       0xd4a017,
+                    "fields":      [],
+                })
+        _prev_charging = charging
+
+        if not charging and pct <= 20 and not _alerted_low:
+            discord_poster._send({
+                "title":       f"⚠️ Low Battery — {pct:.0f}%",
+                "description": "Laptop battery is low. Connect the charger now!",
+                "color":       0xf85149,
+                "fields":      [],
+            })
+            _alerted_low = True
+        if pct > 20:
+            _alerted_low = False
+
+        if charging and pct >= 100 and not _alerted_full:
+            discord_poster._send({
+                "title":       "\U0001f50b Battery Full (100%)",
+                "description": "Still plugged in — you can safely remove the charger.",
+                "color":       0x3fb950,
+                "fields":      [],
+            })
+            _alerted_full = True
+        if not charging or pct < 100:
+            _alerted_full = False
+
+    except Exception as exc:
+        print(f"[battery] Alert check failed: {exc}")
 
 
 def _push_dashboard():
@@ -80,6 +140,7 @@ def main():
                     print(f"[{symbol}] Unhandled error: {exc}")
                     traceback.print_exc()
 
+            _check_battery_alerts()
             _push_dashboard()
             print(f"[run_local] Next cycle in {CYCLE_SECONDS // 60} min...")
             time.sleep(CYCLE_SECONDS)
