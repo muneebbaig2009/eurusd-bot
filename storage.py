@@ -72,7 +72,7 @@ def init_db(db):
         ("tp1", "REAL"), ("tp2", "REAL"), ("confidence", "INTEGER"),
         ("rr", "REAL"), ("trend_strength", "INTEGER"), ("timeframe", "TEXT"),
         ("lot_size", "REAL"), ("trade_num", "INTEGER"), ("pair_id", "INTEGER"),
-        ("breakeven_active", "INTEGER"),
+        ("breakeven_active", "INTEGER"), ("mt5_ticket", "INTEGER"),
     ]:
         if col not in existing_sig:
             cur.execute(f"ALTER TABLE signals ADD COLUMN {col} {ctype}")
@@ -309,12 +309,21 @@ def log_signal_pair(db, sig: dict) -> tuple:
     return id1, id2
 
 
+def set_mt5_ticket(db, signal_id: int, ticket: int) -> None:
+    """Store the MT5 position ticket so we can track the position later."""
+    con = _conn(db)
+    cur = con.cursor()
+    cur.execute("UPDATE signals SET mt5_ticket=? WHERE id=?", (ticket, signal_id))
+    con.commit()
+    con.close()
+
+
 def open_signals(db) -> list:
     con = _conn(db)
     cur = con.cursor()
     cur.execute(
         "SELECT id, direction, entry, tp, sl, contributors, created_at, rr, "
-        "lot_size, trade_num, pair_id, breakeven_active, tp2 "
+        "lot_size, trade_num, pair_id, breakeven_active, tp2, mt5_ticket "
         "FROM signals WHERE status='OPEN'"
     )
     rows = cur.fetchall()
@@ -323,7 +332,8 @@ def open_signals(db) -> list:
         {"id": r[0], "direction": r[1], "entry": r[2], "tp": r[3],
          "sl": r[4], "contributors": json.loads(r[5]), "created_at": r[6],
          "rr": r[7], "lot_size": r[8], "trade_num": r[9] or 1,
-         "pair_id": r[10], "breakeven_active": bool(r[11]), "tp2": r[12]}
+         "pair_id": r[10], "breakeven_active": bool(r[11]), "tp2": r[12],
+         "mt5_ticket": r[13]}
         for r in rows
     ]
 

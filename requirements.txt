@@ -2,3 +2,4 @@ requests>=2.31
 pandas>=2.2
 numpy>=2.0
 pandas-ta-openbb>=0.4.20
+MetaTrader5>=5.0.45; sys_platform == "win32"

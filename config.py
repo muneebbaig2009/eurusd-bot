@@ -6,6 +6,16 @@ import re
 TWELVE_DATA_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
+# --- Execution mode ---
+# "sim"  → GitHub Actions path: Twelve Data feed, no real orders (default)
+# "mt5"  → local path: MT5 terminal feed + real demo-account orders
+EXECUTION_MODE = os.environ.get("EXECUTION_MODE", "sim")
+
+# --- MT5 credentials (only needed when EXECUTION_MODE="mt5") ---
+MT5_LOGIN    = int(os.environ.get("MT5_LOGIN", 0) or 0)
+MT5_PASSWORD = os.environ.get("MT5_PASSWORD", "")
+MT5_SERVER   = os.environ.get("MT5_SERVER",   "")
+
 # --- Trading instruments ---
 # Each pair runs independently: its own database, its own dashboard JSON,
 # and its own self-learning technique weights.
@@ -43,14 +53,14 @@ CANDLE_COUNT = 200
 
 # --- Signal logic ---
 # Combined weighted score must exceed this (absolute) to fire a signal.
-SIGNAL_THRESHOLD = 1.5
+SIGNAL_THRESHOLD = 1.0
 
 # ATR multipliers for stop-loss (volatility based)
-SL_ATR_MULT = 1.5
+SL_ATR_MULT = 2.0
 
 # Two take-profit targets: a near target (TP1) and a far target (TP2).
 # TP1 is set wider than SL so the primary target carries positive risk-reward.
-TP1_ATR_MULT = 2.25
+TP1_ATR_MULT = 1.5
 TP2_ATR_MULT = 3.5
 
 # Kept for backwards compatibility (TP1 is the primary target used for win/loss).
@@ -61,7 +71,7 @@ CONF_MIN = 40
 CONF_MAX = 95
 
 # Minimum confidence % required to post a signal (filters low-conviction setups).
-MIN_CONFIDENCE = 55
+MIN_CONFIDENCE = 60
 
 # Minimum ADX value to allow a signal (filters choppy, non-trending markets).
 MIN_ADX = 12
