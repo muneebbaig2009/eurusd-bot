@@ -5,7 +5,8 @@ import config
 
 def _send(embed: dict):
     if not config.DISCORD_WEBHOOK_URL:
-        print("[discord] No webhook configured; skipping. Embed:", embed["title"])
+        title = embed.get("title", "").encode("ascii", errors="replace").decode("ascii")
+        print(f"[discord] No webhook configured; skipping: {title}")
         return
     resp = requests.post(
         config.DISCORD_WEBHOOK_URL,
