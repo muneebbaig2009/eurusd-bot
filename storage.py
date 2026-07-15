@@ -99,9 +99,9 @@ def calc_lot_size(balance: float, entry: float, sl: float,
     sl_pips = abs(entry - sl) / config.PIP_SIZE
     if sl_pips < 1:
         return config.MIN_LOT
-    raw = risk_usd / (sl_pips * config.PIP_VALUE_PER_LOT)
-    stepped = round(raw / config.LOT_STEP) * config.LOT_STEP
-    return round(max(config.MIN_LOT, min(stepped, config.MAX_LOT)), 2)
+    raw     = risk_usd / (sl_pips * config.PIP_VALUE_PER_LOT)
+    floored = int(raw / config.LOT_STEP) * config.LOT_STEP   # always size down
+    return round(max(config.MIN_LOT, min(floored, config.MAX_LOT)), 2)
 
 
 # ---------------------------------------------------------------------------
