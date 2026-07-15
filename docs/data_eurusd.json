@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T17:30:06.447717+00:00",
+  "updated_at": "2026-07-15T17:32:04.232597+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -53,10 +53,10 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-15T17:30:06.436505+00:00",
+    "checked_at": "2026-07-15T17:32:04.228124+00:00",
     "signal_result": "blocked_open",
     "reason": "Open position exists \u2014 waiting for it to close",
-    "current_price": 1.14572
+    "current_price": 1.14602
   },
   "signals": [
     {
