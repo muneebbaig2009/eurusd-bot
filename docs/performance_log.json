@@ -1,4 +1,15 @@
 {
-  "updated_at": null,
-  "history": []
+  "updated_at": "2026-07-15T07:39:28.530580+00:00",
+  "history": [
+    {
+      "date": "2026-07-15 07:39",
+      "type": "daily_check",
+      "n_trades": 14,
+      "actual_wr": 57.1,
+      "actual_expectancy": 0.66,
+      "expected_wr": 62.2,
+      "expected_expectancy": 0.41,
+      "action": "none"
+    }
+  ]
 }
