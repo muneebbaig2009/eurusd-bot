@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T07:49:47.549112+00:00",
+  "updated_at": "2026-07-15T07:54:51.369988+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 18,
@@ -142,11 +142,11 @@
   },
   "mt5_account": {
     "login": 109677040,
-    "balance": 100000.0,
-    "equity": 100000.0,
+    "balance": 99999.98,
+    "equity": 99999.98,
     "profit": 0.0,
     "margin": 0.0,
-    "free_margin": 100000.0,
+    "free_margin": 99999.98,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
