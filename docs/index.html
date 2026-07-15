@@ -545,55 +545,6 @@ sel.addEventListener("change",()=>{ _currentPair=sel.value; loadPair(_currentPai
 loadPair(_currentPair);
 setInterval(()=>loadPair(_currentPair), 5*60*1000);
 
-// ── Discord battery alerts ────────────────────────────────────────────────────
-let _discordWebhook  = null;
-let _alertedLow      = false;   // sent "low battery" this discharge cycle
-let _alertedFull     = false;   // sent "battery full" this charge cycle
-let _prevCharging    = null;    // tracks charging state to detect plug/unplug
-
-fetch("discord_config.json?_="+Date.now())
-  .then(r=>r.ok?r.json():null)
-  .then(d=>{ if(d&&d.webhook_url) _discordWebhook=d.webhook_url; })
-  .catch(()=>{});
-
-function _discordSend(msg){
-  if(!_discordWebhook) return;
-  fetch(_discordWebhook,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({content: msg})
-  }).catch(()=>{});
-}
-
-function checkBatteryAlerts(battery){
-  const pct  = Math.round(battery.level*100);
-  const chrg = battery.charging;
-
-  // 🔌 Charger plugged in / removed — send on every state change
-  if(_prevCharging !== null && chrg !== _prevCharging){
-    if(chrg){
-      _discordSend(`🔌 **Charger Plugged In** — Battery at ${pct}%, now charging.`);
-    } else {
-      _discordSend(`🔋 **Charger Removed** — Battery at ${pct}%, now on battery.`);
-    }
-  }
-  _prevCharging = chrg;
-
-  // ⚠ Low battery (≤20%, not charging) — send once per discharge
-  if(!chrg && pct<=20 && !_alertedLow){
-    _discordSend(`⚠️ **Low Battery — ${pct}%**\nYour laptop battery is low. Connect the charger now!`);
-    _alertedLow = true;
-  }
-  if(pct>20) _alertedLow = false;  // reset when level recovers
-
-  // 🔋 Full while still plugged in — send once per charge cycle
-  if(chrg && pct>=100 && !_alertedFull){
-    _discordSend(`🔋 **Battery Full (100%)**\nStill plugged in — you can safely remove the charger.`);
-    _alertedFull = true;
-  }
-  if(!chrg || pct<100) _alertedFull = false;  // reset when unplugged or drops
-}
-
 // ── Battery display (shared by JSON source and browser API) ──────────────────
 let _jsonBatteryActive = false;   // true once we've received laptop battery from JSON
 
@@ -629,8 +580,6 @@ function updateBatteryFromJSON(lb){
   if(!lb || lb.percent == null) return;
   _jsonBatteryActive = true;
   renderBatteryWidget(Math.round(lb.percent), lb.charging, lb.secsleft);
-  // Still run alerts (use same logic, construct minimal battery-like object)
-  checkBatteryAlerts({level: lb.percent/100, charging: lb.charging});
 }
 
 // Browser Battery API — only used when JSON hasn't provided laptop data yet
@@ -645,9 +594,8 @@ function updateBattery(battery){
 if("getBattery" in navigator){
   navigator.getBattery().then(bat=>{
     updateBattery(bat);
-    checkBatteryAlerts(bat);
-    bat.addEventListener("levelchange",    ()=>{ updateBattery(bat); checkBatteryAlerts(bat); });
-    bat.addEventListener("chargingchange", ()=>{ updateBattery(bat); checkBatteryAlerts(bat); });
+    bat.addEventListener("levelchange",           ()=>updateBattery(bat));
+    bat.addEventListener("chargingchange",        ()=>updateBattery(bat));
     bat.addEventListener("chargingtimechange",    ()=>updateBattery(bat));
     bat.addEventListener("dischargingtimechange", ()=>updateBattery(bat));
   });
