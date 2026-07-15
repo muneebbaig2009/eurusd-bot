@@ -13,14 +13,17 @@ def connect() -> None:
     if not mt5.initialize():
         raise RuntimeError(f"MT5 initialize() failed: {mt5.last_error()}")
 
-    ok = mt5.login(
-        config.MT5_LOGIN,
-        password=config.MT5_PASSWORD,
-        server=config.MT5_SERVER,
-    )
-    if not ok:
-        mt5.shutdown()
-        raise RuntimeError(f"MT5 login failed for #{config.MT5_LOGIN}: {mt5.last_error()}")
+    # Only call login() when credentials are explicitly configured.
+    # If MT5 terminal is already open and logged in, initialize() alone is enough.
+    if config.MT5_LOGIN:
+        ok = mt5.login(
+            config.MT5_LOGIN,
+            password=config.MT5_PASSWORD,
+            server=config.MT5_SERVER,
+        )
+        if not ok:
+            mt5.shutdown()
+            raise RuntimeError(f"MT5 login failed for #{config.MT5_LOGIN}: {mt5.last_error()}")
 
     info = mt5.account_info()
     if info is None:
