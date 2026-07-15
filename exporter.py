@@ -98,6 +98,21 @@ def export(symbol, cycle_status=None):
     except Exception as _e:
         print(f"[export] MT5 account fetch skipped: {_e}")
 
+    # Laptop battery (read by Python — works correctly on GitHub Pages too)
+    laptop_battery = {}
+    try:
+        import psutil
+        bat = psutil.sensors_battery()
+        if bat:
+            secs = bat.secsleft
+            laptop_battery = {
+                "percent":  round(bat.percent, 1),
+                "charging": bat.power_plugged,
+                "secsleft": secs if secs != psutil.POWER_TIME_UNLIMITED and secs > 0 else None,
+            }
+    except Exception:
+        pass
+
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "symbol":     symbol,
@@ -110,11 +125,12 @@ def export(symbol, cycle_status=None):
         },
         "weights": weights,
         "equity":  equity,
-        "demo":         demo,
-        "mt5_account":  mt5_account,
-        "mt5_trades":   mt5_trades,
-        "cycle_status": cycle_status or {},
-        "signals":      signals,
+        "demo":            demo,
+        "mt5_account":     mt5_account,
+        "mt5_trades":      mt5_trades,
+        "cycle_status":    cycle_status or {},
+        "laptop_battery":  laptop_battery,
+        "signals":         signals,
     }
 
     out_path = config.data_json_path(symbol)

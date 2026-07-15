@@ -24,7 +24,7 @@ def _usd(pips: float, lot_size: float) -> float:
 
 
 def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
-                demo_balance: float = None):
+                demo_balance: float = None, mt5_ticket: int = None):
     """New signal alert. Shows lot size, pip distances, and dollar risk/reward."""
     color = 0x3fb950 if sig["direction"] == "BUY" else 0xf85149
     arrow = "📈" if sig["direction"] == "BUY" else "📉"
@@ -86,6 +86,12 @@ def post_signal(sig: dict, signal_id: int, symbol: str = "EUR/USD",
             {"name": "Reasons",
              "value": contributors or "—",
              "inline": False},
+            {"name": "MT5 Ticket",
+             "value": f"`#{mt5_ticket}`" if mt5_ticket else "`pending`",
+             "inline": True},
+            {"name": "MT5 Balance",
+             "value": f"`${bal:,.2f}`",
+             "inline": True},
         ],
         "footer": {"text": "Auto-generated · Educational use only · Not financial advice"},
     }

@@ -89,8 +89,7 @@ def try_new_signal(symbol, db, timeframes):
     balance = acct.get("balance", config.DEMO_INITIAL_BALANCE) if acct else config.DEMO_INITIAL_BALANCE
     sig["lot_size"] = storage.calc_lot_size(balance, sig["entry"], sig["sl"])
     sid = storage.log_signal(db, sig)
-    discord_poster.post_signal(sig, sid, symbol=symbol, demo_balance=balance)
-    print(f"[{symbol}] Posted #{sid}: {sig['direction']} @ {sig['entry']} "
+    print(f"[{symbol}] Signal #{sid}: {sig['direction']} @ {sig['entry']} "
           f"| Lots {sig['lot_size']} (2% of ${balance:,.2f}, conf {sig['confidence']}%, R:R 1:{sig['rr']})")
     tp = sig.get("tp1") or sig["tp"]
     ticket = mt5_executor.open_trade(
@@ -98,6 +97,9 @@ def try_new_signal(symbol, db, timeframes):
         sl=sig["sl"], tp=tp, magic=sid)
     if ticket:
         storage.set_mt5_ticket(db, sid, ticket)
+        # Send Discord AFTER order is confirmed — includes the MT5 ticket
+        discord_poster.post_signal(sig, sid, symbol=symbol,
+                                   demo_balance=balance, mt5_ticket=ticket)
         status.update(signal_result="generated", signal_id=sid,
                       direction=sig["direction"], entry=sig["entry"],
                       lot_size=sig["lot_size"], confidence=sig["confidence"],

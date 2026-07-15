@@ -346,6 +346,9 @@ function render(d){
   // Track this pair's data for the status panel
   _allPairData[_currentPair] = d;
 
+  // Laptop battery from JSON (overrides browser API — works on phone too)
+  if(d.laptop_battery) updateBatteryFromJSON(d.laptop_battery);
+
   // ── Bot Status ──────────────────────────────────────────────────────────
   let html = renderBotStatus(_allPairData);
 
@@ -591,41 +594,52 @@ function checkBatteryAlerts(battery){
   if(!chrg || pct<100) _alertedFull = false;  // reset when unplugged or drops
 }
 
-// ── Battery Status ────────────────────────────────────────────────────────────
-function updateBattery(battery){
-  const pct   = Math.round(battery.level * 100);
-  const chrg  = battery.charging;
+// ── Battery display (shared by JSON source and browser API) ──────────────────
+let _jsonBatteryActive = false;   // true once we've received laptop battery from JSON
+
+function renderBatteryWidget(pct, chrg, secsLeft){
   const icon  = document.getElementById("batteryIcon");
   const fill  = document.getElementById("batteryFill");
   const pctEl = document.getElementById("batteryPct");
   const stEl  = document.getElementById("batteryStatus");
   const wrap  = document.getElementById("batteryWidget");
 
-  // Colour class by level
   const cls = pct > 50 ? "bat-green" : pct > 20 ? "bat-yellow" : "bat-red";
-  icon.className = "battery-icon " + cls;
-  fill.style.width  = pct + "%";
+  icon.className        = "battery-icon " + cls;
+  fill.style.width      = pct + "%";
   fill.style.background = pct > 50 ? "#3fb950" : pct > 20 ? "#d4a017" : "#f85149";
-
-  pctEl.textContent = pct + "%";
-  pctEl.className   = "battery-pct " + cls;
+  pctEl.textContent     = pct + "%";
+  pctEl.className       = "battery-pct " + cls;
 
   if(chrg){
-    // Show time to full if available
-    const mins = battery.chargingTime;
-    const eta  = (mins && mins !== Infinity)
-      ? " · full in " + Math.round(mins/60) + "m"
-      : "";
+    const eta = (secsLeft && secsLeft > 0)
+      ? " · full in " + Math.round(secsLeft/60) + "m" : "";
     stEl.innerHTML = '<span class="bolt">⚡</span> Charging' + eta;
   } else {
-    const mins = battery.dischargingTime;
-    const eta  = (mins && mins !== Infinity)
-      ? " · " + Math.floor(mins/3600) + "h " + Math.round((mins%3600)/60) + "m left"
-      : "";
+    const eta = (secsLeft && secsLeft > 0)
+      ? " · " + Math.floor(secsLeft/3600) + "h " + Math.round((secsLeft%3600)/60) + "m left" : "";
     stEl.textContent = (pct <= 20 ? "⚠ Low battery" : "On battery") + eta;
   }
-
   wrap.style.display = "flex";
+  wrap.title = "Laptop battery (source: bot)";
+}
+
+// Called from render(d) each time fresh JSON arrives — always shows LAPTOP battery
+function updateBatteryFromJSON(lb){
+  if(!lb || lb.percent == null) return;
+  _jsonBatteryActive = true;
+  renderBatteryWidget(Math.round(lb.percent), lb.charging, lb.secsleft);
+  // Still run alerts (use same logic, construct minimal battery-like object)
+  checkBatteryAlerts({level: lb.percent/100, charging: lb.charging});
+}
+
+// Browser Battery API — only used when JSON hasn't provided laptop data yet
+function updateBattery(battery){
+  if(_jsonBatteryActive) return;   // JSON source takes priority
+  const pct  = Math.round(battery.level * 100);
+  const chrg = battery.charging;
+  const secsLeft = chrg ? battery.chargingTime : battery.dischargingTime;
+  renderBatteryWidget(pct, chrg, (secsLeft && secsLeft !== Infinity) ? secsLeft : null);
 }
 
 if("getBattery" in navigator){
