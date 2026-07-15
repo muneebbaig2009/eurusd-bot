@@ -98,7 +98,14 @@ def open_trade(symbol: str, direction: str, lot: float,
     result = mt5.order_send(request)
     if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
         code = result.retcode if result else "None"
-        print(f"[MT5] order_send failed: retcode={code}  {mt5.last_error()}")
+        hint = ""
+        if code == 10027:
+            hint = " → Enable AutoTrading in MT5 terminal toolbar (green robot icon)"
+        elif code == 10018:
+            hint = " → Market is closed (weekend or outside trading hours)"
+        elif code == 10019:
+            hint = " → Insufficient funds"
+        print(f"[MT5] order_send failed: retcode={code}{hint}  {mt5.last_error()}")
         return None
 
     print(
@@ -130,6 +137,54 @@ def get_position_result(ticket: int):
             return status, deal.price
 
     return None
+
+
+def close_position(ticket: int) -> bool:
+    """Close an open position by ticket using an opposite market order."""
+    positions = mt5.positions_get(ticket=ticket)
+    if not positions:
+        print(f"[MT5] No open position with ticket {ticket}")
+        return False
+
+    pos  = positions[0]
+    sym  = pos.symbol
+
+    if not mt5.symbol_select(sym, True):
+        print(f"[MT5] symbol_select({sym}) failed: {mt5.last_error()}")
+        return False
+
+    tick = mt5.symbol_info_tick(sym)
+    if tick is None:
+        print(f"[MT5] No tick for {sym}: {mt5.last_error()}")
+        return False
+
+    if pos.type == mt5.ORDER_TYPE_BUY:
+        order_type, price = mt5.ORDER_TYPE_SELL, tick.bid
+    else:
+        order_type, price = mt5.ORDER_TYPE_BUY,  tick.ask
+
+    request = {
+        "action":       mt5.TRADE_ACTION_DEAL,
+        "symbol":       sym,
+        "volume":       float(pos.volume),
+        "type":         order_type,
+        "position":     ticket,
+        "price":        price,
+        "deviation":    20,
+        "magic":        pos.magic,
+        "comment":      f"eurusd-bot close #{ticket}",
+        "type_time":    mt5.ORDER_TIME_GTC,
+        "type_filling": mt5.ORDER_FILLING_RETURN,
+    }
+
+    result = mt5.order_send(request)
+    if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
+        code = result.retcode if result else "None"
+        print(f"[MT5] Close failed: retcode={code}  {mt5.last_error()}")
+        return False
+
+    print(f"[MT5] Position {ticket} closed  price={price:.5f}")
+    return True
 
 
 def get_account_info() -> dict:

@@ -165,7 +165,6 @@
   <footer>
     Auto-generated technical signals for education only — not financial advice.
     Signals are designed for MetaTrader 5 demo accounts. Win/loss is measured by whether TP or SL is reached first.
-    Demo account risks <span id="footerRiskPct">2</span>% of balance per trade; lot size is calculated per signal — for simulation only.
   </footer>
 
 <script>
@@ -260,19 +259,6 @@ function render(d){
   const weightRows=Object.entries(d.weights||{}).sort((a,b)=>b[1]-a[1]);
   const maxW=Math.max(1,...Object.values(d.weights||{}));
 
-  const bal     = dm.balance      != null ? dm.balance      : 100;
-  const pnlTot  = dm.pnl_total    != null ? dm.pnl_total    : 0;
-  const retPct  = dm.return_pct   != null ? dm.return_pct   : 0;
-  const balHist = dm.balance_history && dm.balance_history.length>1 ? dm.balance_history : null;
-
-  if(document.getElementById("footerRiskPct"))
-    document.getElementById("footerRiskPct").textContent = (dm.risk_pct||2).toFixed(0);
-
-  const pnlClass  = pnlTot>=0  ? "pos"  : "neg";
-  const retClass  = retPct>=0  ? "pos"  : "neg";
-  const pnlSign   = pnlTot>=0  ? "+"    : "";
-  const retSign   = retPct>=0  ? "+"    : "";
-
   const hasAcct   = acct.balance !== undefined;
   const mt5Profit = hasAcct ? (acct.profit||0) : 0;
 
@@ -315,36 +301,6 @@ function render(d){
       <div class="stat"><div class="label">Losses</div><div class="value loss num">${s.losses}</div></div>
       <div class="stat"><div class="label">Open</div><div class="value num">${s.open}</div></div>
       <div class="stat"><div class="label">Win Rate</div><div class="value num">${s.win_rate}%</div></div>
-    </div>
-  </section>
-
-  <!-- Demo account (simulated P&L tracker) -->
-  <section>
-    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(starts $${(dm.initial_balance||100).toFixed(2)} · 2% risk/trade · simulated)</span></h2>
-    <div class="stats" style="margin-bottom:16px">
-      <div class="stat">
-        <div class="label">Balance</div>
-        <div class="value num">$${bal.toFixed(2)}</div>
-        <div class="sublabel">started $${(dm.initial_balance||100).toFixed(2)}</div>
-      </div>
-      <div class="stat">
-        <div class="label">Total P&amp;L</div>
-        <div class="value ${pnlClass} num">${pnlSign}$${Math.abs(pnlTot).toFixed(2)}</div>
-      </div>
-      <div class="stat">
-        <div class="label">Return</div>
-        <div class="value ${retClass} num">${retSign}${retPct.toFixed(1)}%</div>
-      </div>
-      <div class="stat">
-        <div class="label">Risk / Trade</div>
-        <div class="value num">${(dm.risk_pct||2).toFixed(0)}%</div>
-        <div class="sublabel">of balance</div>
-      </div>
-    </div>
-    <div class="panel">
-      ${balHist
-        ? '<canvas class="chart" id="balanceChart"></canvas>'
-        : '<div class="empty">Balance chart appears after the first trade closes.</div>'}
     </div>
   </section>
 
@@ -438,14 +394,6 @@ function render(d){
   </section>`;
 
   document.getElementById("root").innerHTML = html;
-
-  // Draw balance chart
-  const bcv = document.getElementById("balanceChart");
-  if(bcv && balHist){
-    const initial = dm.initial_balance||100;
-    drawChart(bcv, balHist, {dynamicColor:true, base:initial, prefix:"$"});
-    window.addEventListener("resize", ()=>drawChart(bcv, balHist, {dynamicColor:true, base:initial, prefix:"$"}));
-  }
 
   // Draw equity chart
   const ecv = document.getElementById("equityChart");
