@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T10:02:17.853357+00:00",
+  "updated_at": "2026-07-15T10:07:24.028252+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -42,10 +42,10 @@
   },
   "mt5_trades": [],
   "cycle_status": {
-    "checked_at": "2026-07-15T10:02:17.789192+00:00",
+    "checked_at": "2026-07-15T10:07:23.906915+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14165
+    "current_price": 1.14149
   },
   "signals": []
 }
