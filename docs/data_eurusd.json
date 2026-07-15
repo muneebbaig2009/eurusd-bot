@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T12:43:25.451460+00:00",
+  "updated_at": "2026-07-15T12:48:30.020462+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -53,10 +53,10 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-15T12:43:25.344459+00:00",
+    "checked_at": "2026-07-15T12:48:29.886932+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14245
+    "current_price": 1.14266
   },
   "signals": []
 }
