@@ -120,6 +120,21 @@
   .pnl-pos{color:var(--buy);font-weight:600}
   .pnl-neg{color:var(--sell);font-weight:600}
 
+  /* Tuner badge */
+  .tuner-badge{
+    display:inline-block;font-size:10px;font-weight:700;
+    padding:1px 6px;border-radius:3px;vertical-align:middle;
+  }
+  .tuner-badge.applied{
+    color:var(--buy);background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3)
+  }
+  .tuner-badge.none{
+    color:var(--muted);background:rgba(125,141,161,.1);border:1px solid var(--line)
+  }
+  .tuner-badge.early_reopt{
+    color:var(--accent);background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3)
+  }
+
   footer{
     margin-top:32px;padding-top:16px;border-top:1px solid var(--line);
     font-size:11px;color:var(--muted);line-height:1.7;
@@ -144,9 +159,12 @@
     <div class="empty">Loading data…</div>
   </div>
 
+  <!-- Tuner section loads from performance_log.json independently -->
+  <div id="tunerSection"></div>
+
   <footer>
-    Auto-generated technical signals for education only — not financial advice. Free data may be delayed.
-    Signals are designed for MetaTrader 5. Win/loss is measured by whether TP or SL is reached first.
+    Auto-generated technical signals for education only — not financial advice.
+    Signals are designed for MetaTrader 5 demo accounts. Win/loss is measured by whether TP or SL is reached first.
     Demo account risks <span id="footerRiskPct">2</span>% of balance per trade; lot size is calculated per signal — for simulation only.
   </footer>
 
@@ -168,7 +186,7 @@ function timeAgo(iso){
 function drawChart(canvas, series, opts){
   opts = opts||{};
   const color   = opts.color   || "#d4a017";
-  const base    = opts.base;          // if set, draw baseline at this value
+  const base    = opts.base;
   const prefix  = opts.prefix  || "";
   const dpr = window.devicePixelRatio||1;
   const w=canvas.clientWidth, h=canvas.clientHeight;
@@ -184,14 +202,12 @@ function drawChart(canvas, series, opts){
   const xs=i=>pad+(i/(series.length-1))*(w-2*pad);
   const ys=v=>h-pad-((v-mn)/range)*(h-2*pad);
 
-  // baseline
   if(base!==undefined && base>=mn && base<=mx){
     ctx.strokeStyle="#1e2935"; ctx.lineWidth=1; ctx.setLineDash([4,4]);
     ctx.beginPath(); ctx.moveTo(pad,ys(base)); ctx.lineTo(w-pad,ys(base)); ctx.stroke();
     ctx.setLineDash([]);
   }
 
-  // area fill
   const lastVal = series[series.length-1];
   const fillColor = opts.dynamicColor
     ? (lastVal >= (base||mn) ? "rgba(63,185,80,.18)" : "rgba(248,81,73,.18)")
@@ -209,18 +225,13 @@ function drawChart(canvas, series, opts){
   ctx.lineTo(xs(0),ys(mn));
   ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
 
-  // line
   ctx.beginPath();
   series.forEach((v,i)=>{ i?ctx.lineTo(xs(i),ys(v)):ctx.moveTo(xs(i),ys(v)); });
   ctx.strokeStyle=lineColor; ctx.lineWidth=2; ctx.lineJoin="round"; ctx.stroke();
 
-  // last dot
   const lx=xs(series.length-1), ly=ys(lastVal);
   ctx.beginPath(); ctx.arc(lx,ly,3.5,0,7); ctx.fillStyle=lineColor; ctx.fill();
-
-  // last value label
-  ctx.fillStyle=lineColor; ctx.font=`11px monospace`;
-  const label = prefix + (Number(lastVal)>=0&&prefix?"":"")+Number(lastVal).toFixed(prefix?"2":"0");
+  ctx.fillStyle=lineColor; ctx.font="11px monospace";
   ctx.fillText(prefix+Number(lastVal).toFixed(2), lx+7, ly+4);
 }
 
@@ -242,16 +253,16 @@ function pnlHtml(pnl){
 function render(d){
   document.getElementById("updated").textContent = "updated "+timeAgo(d.updated_at);
 
-  const s=d.stats;
-  const dm=d.demo||{};
+  const s    = d.stats;
+  const dm   = d.demo||{};
+  const acct = d.mt5_account||{};
+  const mt5T = d.mt5_trades||[];
   const weightRows=Object.entries(d.weights||{}).sort((a,b)=>b[1]-a[1]);
   const maxW=Math.max(1,...Object.values(d.weights||{}));
 
-  // Demo account numbers
   const bal     = dm.balance      != null ? dm.balance      : 100;
   const pnlTot  = dm.pnl_total    != null ? dm.pnl_total    : 0;
   const retPct  = dm.return_pct   != null ? dm.return_pct   : 0;
-  const risk    = dm.risk_per_trade != null ? dm.risk_per_trade : 2;
   const balHist = dm.balance_history && dm.balance_history.length>1 ? dm.balance_history : null;
 
   if(document.getElementById("footerRiskPct"))
@@ -262,7 +273,40 @@ function render(d){
   const pnlSign   = pnlTot>=0  ? "+"    : "";
   const retSign   = retPct>=0  ? "+"    : "";
 
+  const hasAcct   = acct.balance !== undefined;
+  const mt5Profit = hasAcct ? (acct.profit||0) : 0;
+
+  // ── MT5 Live Account ─────────────────────────────────────────────────────
   let html = `
+  <section>
+    <h2>MT5 Live Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">${esc(acct.server||"MetaQuotes-Demo")} · #${esc(String(acct.login||"—"))}</span></h2>
+    ${hasAcct ? `
+    <div class="stats" style="margin-bottom:0">
+      <div class="stat">
+        <div class="label">Balance</div>
+        <div class="value num">$${acct.balance.toFixed(2)}</div>
+        <div class="sublabel">${esc(acct.currency||"USD")}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Equity</div>
+        <div class="value num">$${acct.equity.toFixed(2)}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Floating P&amp;L</div>
+        <div class="value ${mt5Profit>=0?'pos':'neg'} num">${mt5Profit>=0?'+':'-'}$${Math.abs(mt5Profit).toFixed(2)}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Free Margin</div>
+        <div class="value num">$${acct.free_margin.toFixed(2)}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Leverage</div>
+        <div class="value num">1:${acct.leverage||"—"}</div>
+      </div>
+    </div>` : `
+    <div class="panel"><div class="empty">MT5 account data not available — bot not yet connected or first cycle pending.</div></div>`}
+  </section>
+
   <!-- Signal stats -->
   <section>
     <div class="stats">
@@ -274,9 +318,9 @@ function render(d){
     </div>
   </section>
 
-  <!-- Demo account -->
+  <!-- Demo account (simulated P&L tracker) -->
   <section>
-    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(MT5 · starts $${(dm.initial_balance||100).toFixed(2)} · 2% risk/trade)</span></h2>
+    <h2>Demo Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(starts $${(dm.initial_balance||100).toFixed(2)} · 2% risk/trade · simulated)</span></h2>
     <div class="stats" style="margin-bottom:16px">
       <div class="stat">
         <div class="label">Balance</div>
@@ -323,6 +367,34 @@ function render(d){
           <div class="wval num">${w.toFixed(2)}</div>
         </div>`).join("") : '<div class="empty">No weights recorded yet.</div>'}
     </div>
+  </section>
+
+  <!-- MT5 Executed Trades -->
+  <section>
+    <h2>MT5 Executed Trades <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(actual orders on demo account · last 60 days)</span></h2>
+    ${mt5T.length ? `
+    <div class="table-wrap">
+      <table style="min-width:600px">
+        <thead><tr>
+          <th>Time</th><th>Symbol</th><th>Side</th><th>Volume</th><th>Close Price</th><th>Profit</th><th>Comment</th>
+        </tr></thead>
+        <tbody>
+          ${mt5T.map(t=>{
+            const pos = t.profit>=0;
+            return `
+            <tr>
+              <td class="muted">${timeAgo(t.time)}</td>
+              <td class="num">${esc(t.symbol)}</td>
+              <td><span class="pill ${esc(t.type)}">${esc(t.type)}</span></td>
+              <td class="num lots">${t.volume}L</td>
+              <td class="num">${Number(t.price).toFixed(5)}</td>
+              <td class="num"><span class="${pos?'pnl-pos':'pnl-neg'}">${pos?'+':'-'}$${Math.abs(t.profit).toFixed(2)}</span></td>
+              <td class="muted" style="font-size:11px">${esc(t.comment||"")}</td>
+            </tr>`;}).join("")}
+        </tbody>
+      </table>
+    </div>` : `
+    <div class="panel"><div class="empty">No MT5 trades yet — they appear here after the bot places and closes orders on your demo account.</div></div>`}
   </section>
 
   <!-- Signal history -->
@@ -384,6 +456,70 @@ function render(d){
   }
 }
 
+// ── Strategy Auto-Tuner log (loaded from performance_log.json) ──────────────
+
+function badgeHtml(action){
+  if(!action || action==="none") return '<span class="tuner-badge none">none</span>';
+  if(action==="early_reopt")     return '<span class="tuner-badge early_reopt">reopt triggered</span>';
+  if(String(action).startsWith("applied") || action===true)
+                                 return '<span class="tuner-badge applied">applied</span>';
+  return `<span class="tuner-badge none">${esc(String(action))}</span>`;
+}
+
+function renderTuner(log){
+  const entries = (log.history||[]).slice(0,15);
+  const updAt   = log.updated_at ? "updated "+timeAgo(log.updated_at) : "";
+
+  let html = `
+  <section style="margin-bottom:28px">
+    <h2>Strategy Auto-Tuner <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">${updAt}</span></h2>`;
+
+  if(!entries.length){
+    html += `<div class="panel"><div class="empty">No tuner runs yet — first daily comparison runs 24h after bot start.</div></div>`;
+  } else {
+    html += `
+    <div class="table-wrap">
+      <table style="min-width:700px">
+        <thead><tr>
+          <th>Date</th><th>Type</th><th>Trades</th>
+          <th>Actual WR</th><th>Expected WR</th>
+          <th>Actual E</th><th>Expected E</th><th>Action</th>
+        </tr></thead>
+        <tbody>
+          ${entries.map(e=>{
+            const wrOk  = e.actual_wr   != null && e.expected_wr  != null;
+            const eOk   = e.actual_expectancy != null;
+            const wrCls = wrOk ? (e.actual_wr >= e.expected_wr ? 'pnl-pos' : 'pnl-neg') : 'muted';
+            return `
+            <tr>
+              <td class="muted">${esc(e.date||"—")}</td>
+              <td class="muted">${esc((e.type||"").replace(/_/g," "))}</td>
+              <td class="num muted">${e.n_trades!=null?e.n_trades:"—"}</td>
+              <td class="num ${wrCls}">${e.actual_wr!=null?(e.actual_wr+"%"):"—"}</td>
+              <td class="num muted">${e.expected_wr!=null?(e.expected_wr+"%"):"—"}</td>
+              <td class="num ${eOk&&e.actual_expectancy>=0?'pnl-pos':eOk?'pnl-neg':'muted'}">${eOk?("$"+e.actual_expectancy.toFixed(2)):"—"}</td>
+              <td class="num muted">${e.expected_expectancy!=null?("$"+e.expected_expectancy.toFixed(2)):"—"}</td>
+              <td>${badgeHtml(e.action!=null?e.action:(e.applied!=null?e.applied:null))}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  html += `</section>`;
+  document.getElementById("tunerSection").innerHTML = html;
+}
+
+function loadTunerLog(){
+  fetch("performance_log.json?_="+Date.now())
+    .then(r=>{ if(!r.ok) return null; return r.json(); })
+    .then(data=>{ if(data) renderTuner(data); })
+    .catch(()=>{});
+}
+
+// ── Pair switching + auto-refresh ────────────────────────────────────────────
+
 function pairLabel(slug){
   return slug.slice(0,3).toUpperCase()+"/"+slug.slice(3).toUpperCase();
 }
@@ -400,13 +536,13 @@ function loadPair(slug){
       document.getElementById("root").innerHTML=
         `<div class="err">No data for ${lbl} yet.<br>It appears after the bot runs once for this pair and commits its results.</div>`;
     });
+  loadTunerLog();
 }
 
 const sel=document.getElementById("pairSelect");
 let _currentPair = sel.value;
 sel.addEventListener("change",()=>{ _currentPair=sel.value; loadPair(_currentPair); });
 loadPair(_currentPair);
-// Auto-refresh every 5 minutes so the page stays current without a manual reload
 setInterval(()=>loadPair(_currentPair), 5*60*1000);
 </script>
 </body>

@@ -130,3 +130,50 @@ def get_position_result(ticket: int):
             return status, deal.price
 
     return None
+
+
+def get_account_info() -> dict:
+    """Return live MT5 account state as a plain dict."""
+    info = mt5.account_info()
+    if info is None:
+        return {}
+    return {
+        "login":       info.login,
+        "balance":     round(info.balance, 2),
+        "equity":      round(info.equity, 2),
+        "profit":      round(info.profit, 2),
+        "margin":      round(info.margin, 2),
+        "free_margin": round(info.margin_free, 2),
+        "currency":    info.currency,
+        "leverage":    info.leverage,
+        "server":      info.server,
+    }
+
+
+def get_trade_history(days: int = 60) -> list:
+    """Return closed deals placed by this bot over the last N days."""
+    from datetime import datetime, timedelta, timezone
+    from_dt = datetime.now(timezone.utc) - timedelta(days=days)
+    to_dt   = datetime.now(timezone.utc)
+
+    deals = mt5.history_deals_get(from_dt, to_dt)
+    if deals is None:
+        return []
+
+    trades = []
+    for d in deals:
+        if "eurusd-bot" not in str(d.comment).lower():
+            continue
+        if d.entry != mt5.DEAL_ENTRY_OUT:
+            continue
+        trades.append({
+            "ticket":  d.order,
+            "time":    datetime.fromtimestamp(d.time, tz=timezone.utc).isoformat(),
+            "symbol":  d.symbol,
+            "type":    "BUY" if d.type == mt5.DEAL_TYPE_BUY else "SELL",
+            "volume":  d.volume,
+            "price":   round(d.price, 5),
+            "profit":  round(d.profit, 2),
+            "comment": d.comment,
+        })
+    return sorted(trades, key=lambda x: x["time"], reverse=True)

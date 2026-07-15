@@ -1,0 +1,21 @@
+# Dashboard container — serves the live docs/ folder on http://localhost:8080
+# The MT5 bot runs on Windows host (can't run in Linux container).
+# Start dashboard:   docker compose up -d
+# Stop dashboard:    docker compose down
+# View logs:         docker compose logs -f
+
+services:
+  dashboard:
+    image: nginx:alpine
+    container_name: eurusd-dashboard
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

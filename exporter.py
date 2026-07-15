@@ -87,6 +87,17 @@ def export(symbol):
 
     demo = storage.get_demo_stats(db)
 
+    # MT5 live account data (requires MT5 to be connected)
+    mt5_account, mt5_trades = {}, []
+    try:
+        import MetaTrader5 as _mt5
+        if _mt5.account_info() is not None:
+            import mt5_executor
+            mt5_account = mt5_executor.get_account_info()
+            mt5_trades  = mt5_executor.get_trade_history(days=60)
+    except Exception as _e:
+        print(f"[export] MT5 account fetch skipped: {_e}")
+
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "symbol":     symbol,
@@ -99,8 +110,10 @@ def export(symbol):
         },
         "weights": weights,
         "equity":  equity,
-        "demo":    demo,
-        "signals": signals,
+        "demo":        demo,
+        "mt5_account": mt5_account,
+        "mt5_trades":  mt5_trades,
+        "signals":     signals,
     }
 
     out_path = config.data_json_path(symbol)

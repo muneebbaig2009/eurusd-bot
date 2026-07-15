@@ -1,17 +1,13 @@
-"""Local MT5 runner — replaces GitHub Actions for live demo-account trading.
+"""Local MT5 runner — main loop for the live demo-account signal bot.
 
-Sets EXECUTION_MODE=mt5 before any other import so config.py picks it up.
-Loops every 15 minutes, runs one cycle per pair, then pushes the dashboard
-to GitHub (master -> main) so the static site stays current.
+Loops every 5 minutes, runs one cycle per pair, checks the auto-tuner schedule,
+then pushes the dashboard to GitHub (master -> main) so the static site stays current.
 
 Usage:
     python run_local.py
 
 Stop with Ctrl+C. MT5 terminal must be open and logged in before starting.
 """
-import os
-os.environ.setdefault("EXECUTION_MODE", "mt5")   # must be set before config import
-
 import time
 import subprocess
 import traceback
@@ -19,6 +15,7 @@ from datetime import datetime, timezone
 
 import config
 import mt5_executor
+import auto_tuner
 import main as bot
 
 CYCLE_SECONDS = 5 * 60    # 5-minute cadence for realistic live signal tracking
@@ -53,11 +50,19 @@ def main():
     print(f"[run_local] Pairs: {config.PAIRS}  Cycle: {CYCLE_SECONDS}s")
 
     mt5_executor.connect()
+    auto_tuner.init_baseline()
 
     try:
         while True:
             now = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
             print(f"\n{'='*55}\n[cycle] {now}")
+
+            # Auto-tuner schedule check (runs once per cycle, not per pair)
+            try:
+                auto_tuner.check_and_run(config.db_path(config.PAIRS[0]))
+            except Exception as exc:
+                print(f"[tuner] Error: {exc}")
+                traceback.print_exc()
 
             for symbol in config.PAIRS:
                 try:

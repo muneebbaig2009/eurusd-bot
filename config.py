@@ -3,15 +3,9 @@ import os
 import re
 
 # --- Secrets (set these as environment variables / GitHub Secrets) ---
-TWELVE_DATA_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
-# --- Execution mode ---
-# "sim"  → GitHub Actions path: Twelve Data feed, no real orders (default)
-# "mt5"  → local path: MT5 terminal feed + real demo-account orders
-EXECUTION_MODE = os.environ.get("EXECUTION_MODE", "sim")
-
-# --- MT5 credentials (only needed when EXECUTION_MODE="mt5") ---
+# --- MT5 credentials ---
 MT5_LOGIN    = int(os.environ.get("MT5_LOGIN", 0) or 0)
 MT5_PASSWORD = os.environ.get("MT5_PASSWORD", "")
 MT5_SERVER   = os.environ.get("MT5_SERVER",   "")
@@ -40,13 +34,6 @@ def data_json_path(symbol: str) -> str:
     """Per-pair dashboard JSON, e.g. docs/data_eurusd.json."""
     return f"docs/data_{slug(symbol)}.json"
 
-
-# Timeframes we pull from Twelve Data. (3h is resampled from 1h separately.)
-TIMEFRAMES = {
-    "5min": "5min",
-    "1h": "1h",
-    "1day": "1day",
-}
 
 # How many candles to request per timeframe
 CANDLE_COUNT = 200

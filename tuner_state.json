@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "sl_mult": 2.0,
+    "tp_mult": 1.5,
+    "threshold": 1.0,
+    "min_conf": 60,
+    "expected_wr": 62.2,
+    "expected_expectancy": 0.41,
+    "source": "initial_backtest",
+    "timestamp": "2026-07-15T07:35:22.643265+00:00"
+  }
+}
