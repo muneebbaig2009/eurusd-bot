@@ -140,6 +140,24 @@
     font-size:11px;color:var(--muted);line-height:1.7;
   }
   .err{color:var(--sell);padding:30px;text-align:center;border:1px dashed var(--line);border-radius:6px}
+
+  /* Bot Status panel */
+  .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .status-card{
+    background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
+    padding:14px 16px;display:flex;flex-direction:column;gap:6px;
+  }
+  .status-card .sc-pair{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .status-card .sc-result{font-size:15px;font-weight:700}
+  .status-card .sc-result.generated{color:var(--buy)}
+  .status-card .sc-result.blocked_open{color:var(--accent)}
+  .status-card .sc-result.blocked_cooldown{color:var(--accent)}
+  .status-card .sc-result.no_conditions{color:var(--muted)}
+  .status-card .sc-result.order_failed{color:var(--sell)}
+  .status-card .sc-result.data_error{color:var(--sell)}
+  .status-card .sc-reason{font-size:12px;color:var(--muted);line-height:1.4}
+  .status-card .sc-meta{font-size:11px;color:var(--muted);margin-top:2px}
+  .status-card .sc-price{font-size:13px;color:var(--ink);font-weight:600}
 </style>
 </head>
 <body>
@@ -249,6 +267,47 @@ function pnlHtml(pnl){
   return `<span class="${pos?'pnl-pos':'pnl-neg'}">${sign}$${Math.abs(pnl).toFixed(2)}</span>`;
 }
 
+function statusLabel(r){
+  if(!r) return "—";
+  const map={
+    generated:"Signal Generated",
+    blocked_open:"Position Open",
+    blocked_cooldown:"Cooldown",
+    no_conditions:"No Signal",
+    order_failed:"Order Failed",
+    data_error:"Data Error",
+  };
+  return map[r]||r;
+}
+
+function renderBotStatus(allPairData){
+  // allPairData is an object keyed by pair slug with the full data payload
+  const pairs = Object.entries(allPairData);
+  if(!pairs.length) return "";
+  const cards = pairs.map(([slug, d])=>{
+    const cs = d.cycle_status||{};
+    const result = cs.signal_result||"unknown";
+    const label  = pairLabel(slug);
+    const price  = cs.current_price!=null ? Number(cs.current_price).toFixed(5) : null;
+    return `
+    <div class="status-card">
+      <div class="sc-pair">${esc(label)}</div>
+      <div class="sc-result ${esc(result)}">${esc(statusLabel(result))}</div>
+      ${price ? `<div class="sc-price">${price}</div>` : ""}
+      <div class="sc-reason">${esc(cs.reason||"—")}</div>
+      <div class="sc-meta">Last checked: ${timeAgo(cs.checked_at)}</div>
+    </div>`;
+  }).join("");
+  return `
+  <section>
+    <h2>Bot Status <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">(updates every 5 min)</span></h2>
+    <div class="status-grid">${cards}</div>
+  </section>`;
+}
+
+// Cache for all pair data (to render the status panel across pairs)
+const _allPairData = {};
+
 function render(d){
   document.getElementById("updated").textContent = "updated "+timeAgo(d.updated_at);
 
@@ -262,8 +321,14 @@ function render(d){
   const hasAcct   = acct.balance !== undefined;
   const mt5Profit = hasAcct ? (acct.profit||0) : 0;
 
+  // Track this pair's data for the status panel
+  _allPairData[_currentPair] = d;
+
+  // ── Bot Status ──────────────────────────────────────────────────────────
+  let html = renderBotStatus(_allPairData);
+
   // ── MT5 Live Account ─────────────────────────────────────────────────────
-  let html = `
+  html += `
   <section>
     <h2>MT5 Live Account <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400">${esc(acct.server||"MetaQuotes-Demo")} · #${esc(String(acct.login||"—"))}</span></h2>
     ${hasAcct ? `

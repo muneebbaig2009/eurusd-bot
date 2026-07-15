@@ -7,7 +7,7 @@ import config
 import storage
 
 
-def export(symbol):
+def export(symbol, cycle_status=None):
     db = config.db_path(symbol)
     storage.init_db(db)
 
@@ -110,10 +110,11 @@ def export(symbol):
         },
         "weights": weights,
         "equity":  equity,
-        "demo":        demo,
-        "mt5_account": mt5_account,
-        "mt5_trades":  mt5_trades,
-        "signals":     signals,
+        "demo":         demo,
+        "mt5_account":  mt5_account,
+        "mt5_trades":   mt5_trades,
+        "cycle_status": cycle_status or {},
+        "signals":      signals,
     }
 
     out_path = config.data_json_path(symbol)

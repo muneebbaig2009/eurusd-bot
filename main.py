@@ -51,9 +51,14 @@ def check_open_signals(symbol, db):
 
 
 def try_new_signal(symbol, db, timeframes):
+    """Returns a cycle_status dict describing why a signal was or wasn't generated."""
+    status = {"checked_at": datetime.now(timezone.utc).isoformat()}
+
     if storage.has_open_signal(db):
+        status.update(signal_result="blocked_open",
+                      reason="Open position exists — waiting for it to close")
         print(f"[{symbol}] Open signal exists; not generating a new one.")
-        return
+        return status
 
     pair_cfg = config.get_pair_config(symbol)
 
@@ -65,13 +70,19 @@ def try_new_signal(symbol, db, timeframes):
         elapsed = (now_utc - last_close).total_seconds() / 3600
         cooldown = pair_cfg["SIGNAL_COOLDOWN_BARS"]
         if elapsed < cooldown:
-            print(f"[{symbol}] Cooldown active — {cooldown - elapsed:.1f}h remaining.")
-            return
+            remaining = round(cooldown - elapsed, 1)
+            status.update(signal_result="blocked_cooldown",
+                          cooldown_remaining_h=remaining,
+                          reason=f"Cooldown: {remaining}h remaining after last close")
+            print(f"[{symbol}] Cooldown active — {remaining}h remaining.")
+            return status
 
     sig = signal_engine.generate_signal(db, timeframes, cfg=pair_cfg)
     if sig is None:
+        status.update(signal_result="no_conditions",
+                      reason="No signal conditions met this cycle (score/ADX/confidence below thresholds)")
         print(f"[{symbol}] No valid signal this cycle.")
-        return
+        return status
 
     import mt5_executor
     acct    = mt5_executor.get_account_info()
@@ -87,9 +98,16 @@ def try_new_signal(symbol, db, timeframes):
         sl=sig["sl"], tp=tp, magic=sid)
     if ticket:
         storage.set_mt5_ticket(db, sid, ticket)
+        status.update(signal_result="generated", signal_id=sid,
+                      direction=sig["direction"], entry=sig["entry"],
+                      lot_size=sig["lot_size"], confidence=sig["confidence"],
+                      reason=f"Signal #{sid} {sig['direction']} @ {sig['entry']} | {sig['lot_size']}L")
     else:
         print(f"[{symbol}] MT5 order failed — cancelling signal #{sid}")
         storage.close_signal(db, sid, "LOSS", sig["entry"])
+        status.update(signal_result="order_failed",
+                      reason="MT5 order rejected by broker — signal cancelled")
+    return status
 
 
 def run_pair(symbol):
@@ -101,10 +119,24 @@ def run_pair(symbol):
     except Exception as e:
         print(f"[{symbol}] Data fetch failed: {e}")
         traceback.print_exc()
+        exporter.export(symbol, cycle_status={
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+            "signal_result": "data_error",
+            "reason": f"MT5 data fetch failed: {e}",
+        })
         return
     check_open_signals(symbol, db)
-    try_new_signal(symbol, db, timeframes)
-    exporter.export(symbol)
+    cycle_status = try_new_signal(symbol, db, timeframes)
+
+    # Attach current price from primary timeframe
+    try:
+        df = timeframes.get(config.PRIMARY_TF)
+        if df is not None and not df.empty:
+            cycle_status["current_price"] = round(float(df["close"].iloc[-1]), 5)
+    except Exception:
+        pass
+
+    exporter.export(symbol, cycle_status=cycle_status)
     print(f"[{symbol}] Cycle complete. Weights:", storage.all_weights(db))
 
 
