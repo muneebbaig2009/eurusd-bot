@@ -141,6 +141,19 @@
   }
   .err{color:var(--sell);padding:30px;text-align:center;border:1px dashed var(--line);border-radius:6px}
 
+  /* Battery widget */
+  .battery-wrap{display:flex;align-items:center;gap:10px;font-size:12px}
+  .battery-icon{position:relative;width:34px;height:17px;border:2px solid currentColor;border-radius:3px;display:inline-flex;align-items:center;padding:2px}
+  .battery-icon::after{content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:3px;height:7px;background:currentColor;border-radius:0 2px 2px 0}
+  .battery-fill{height:100%;border-radius:1px;transition:width .5s,background .5s}
+  .battery-pct{font-weight:700;min-width:34px}
+  .battery-status{color:var(--muted);font-size:11px}
+  .bat-green{color:#3fb950}
+  .bat-yellow{color:#d4a017}
+  .bat-red{color:#f85149}
+  .bolt{font-size:13px;animation:boltpulse 1.2s infinite}
+  @keyframes boltpulse{0%,100%{opacity:1}50%{opacity:.4}}
+
   /* Bot Status panel */
   .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
   .status-card{
@@ -170,7 +183,16 @@
         <option value="gbpusd">GBP/USD</option>
       </select>
     </div>
-    <div class="updated"><span class="dot"></span><span id="updated">loading…</span></div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <div class="battery-wrap" id="batteryWidget" style="display:none">
+        <div class="battery-icon" id="batteryIcon">
+          <div class="battery-fill" id="batteryFill"></div>
+        </div>
+        <span class="battery-pct" id="batteryPct"></span>
+        <span class="battery-status" id="batteryStatus"></span>
+      </div>
+      <div class="updated"><span class="dot"></span><span id="updated">loading…</span></div>
+    </div>
   </header>
 
   <div id="root">
@@ -519,6 +541,53 @@ let _currentPair = sel.value;
 sel.addEventListener("change",()=>{ _currentPair=sel.value; loadPair(_currentPair); });
 loadPair(_currentPair);
 setInterval(()=>loadPair(_currentPair), 5*60*1000);
+
+// ── Battery Status ────────────────────────────────────────────────────────────
+function updateBattery(battery){
+  const pct   = Math.round(battery.level * 100);
+  const chrg  = battery.charging;
+  const icon  = document.getElementById("batteryIcon");
+  const fill  = document.getElementById("batteryFill");
+  const pctEl = document.getElementById("batteryPct");
+  const stEl  = document.getElementById("batteryStatus");
+  const wrap  = document.getElementById("batteryWidget");
+
+  // Colour class by level
+  const cls = pct > 50 ? "bat-green" : pct > 20 ? "bat-yellow" : "bat-red";
+  icon.className = "battery-icon " + cls;
+  fill.style.width  = pct + "%";
+  fill.style.background = pct > 50 ? "#3fb950" : pct > 20 ? "#d4a017" : "#f85149";
+
+  pctEl.textContent = pct + "%";
+  pctEl.className   = "battery-pct " + cls;
+
+  if(chrg){
+    // Show time to full if available
+    const mins = battery.chargingTime;
+    const eta  = (mins && mins !== Infinity)
+      ? " · full in " + Math.round(mins/60) + "m"
+      : "";
+    stEl.innerHTML = '<span class="bolt">⚡</span> Charging' + eta;
+  } else {
+    const mins = battery.dischargingTime;
+    const eta  = (mins && mins !== Infinity)
+      ? " · " + Math.floor(mins/3600) + "h " + Math.round((mins%3600)/60) + "m left"
+      : "";
+    stEl.textContent = (pct <= 20 ? "⚠ Low battery" : "On battery") + eta;
+  }
+
+  wrap.style.display = "flex";
+}
+
+if("getBattery" in navigator){
+  navigator.getBattery().then(bat=>{
+    updateBattery(bat);
+    bat.addEventListener("levelchange",    ()=>updateBattery(bat));
+    bat.addEventListener("chargingchange", ()=>updateBattery(bat));
+    bat.addEventListener("chargingtimechange",    ()=>updateBattery(bat));
+    bat.addEventListener("dischargingtimechange", ()=>updateBattery(bat));
+  });
+}
 </script>
 </body>
 </html>
