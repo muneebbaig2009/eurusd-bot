@@ -542,6 +542,44 @@ sel.addEventListener("change",()=>{ _currentPair=sel.value; loadPair(_currentPai
 loadPair(_currentPair);
 setInterval(()=>loadPair(_currentPair), 5*60*1000);
 
+// ── Discord battery alerts ────────────────────────────────────────────────────
+let _discordWebhook  = null;
+let _alertedLow      = false;   // sent "low battery" this discharge cycle
+let _alertedFull     = false;   // sent "battery full" this charge cycle
+
+fetch("discord_config.json?_="+Date.now())
+  .then(r=>r.ok?r.json():null)
+  .then(d=>{ if(d&&d.webhook_url) _discordWebhook=d.webhook_url; })
+  .catch(()=>{});
+
+function _discordSend(msg){
+  if(!_discordWebhook) return;
+  fetch(_discordWebhook,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({content: msg})
+  }).catch(()=>{});
+}
+
+function checkBatteryAlerts(battery){
+  const pct  = Math.round(battery.level*100);
+  const chrg = battery.charging;
+
+  // ⚠ Low battery (≤20%, not charging) — send once per discharge
+  if(!chrg && pct<=20 && !_alertedLow){
+    _discordSend(`⚠️ **Low Battery — ${pct}%**\nYour laptop battery is low. Connect the charger now!`);
+    _alertedLow = true;
+  }
+  if(pct>20) _alertedLow = false;  // reset when level recovers
+
+  // 🔋 Full while still plugged in — send once per charge cycle
+  if(chrg && pct>=100 && !_alertedFull){
+    _discordSend(`🔋 **Battery Full (100%)**\nStill plugged in — you can safely remove the charger.`);
+    _alertedFull = true;
+  }
+  if(!chrg || pct<100) _alertedFull = false;  // reset when unplugged or drops
+}
+
 // ── Battery Status ────────────────────────────────────────────────────────────
 function updateBattery(battery){
   const pct   = Math.round(battery.level * 100);
@@ -582,8 +620,9 @@ function updateBattery(battery){
 if("getBattery" in navigator){
   navigator.getBattery().then(bat=>{
     updateBattery(bat);
-    bat.addEventListener("levelchange",    ()=>updateBattery(bat));
-    bat.addEventListener("chargingchange", ()=>updateBattery(bat));
+    checkBatteryAlerts(bat);
+    bat.addEventListener("levelchange",    ()=>{ updateBattery(bat); checkBatteryAlerts(bat); });
+    bat.addEventListener("chargingchange", ()=>{ updateBattery(bat); checkBatteryAlerts(bat); });
     bat.addEventListener("chargingtimechange",    ()=>updateBattery(bat));
     bat.addEventListener("dischargingtimechange", ()=>updateBattery(bat));
   });

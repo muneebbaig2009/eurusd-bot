@@ -5,3 +5,4 @@ test2.db
 .env
 .venv/
 venv/
+docs/discord_config.json

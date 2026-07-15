@@ -8,6 +8,8 @@ Usage:
 
 Stop with Ctrl+C. MT5 terminal must be open and logged in before starting.
 """
+import json
+import os
 import time
 import subprocess
 import traceback
@@ -48,6 +50,13 @@ def main():
     print(f"[run_local] Starting MT5 local runner  "
           f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
     print(f"[run_local] Pairs: {config.PAIRS}  Cycle: {CYCLE_SECONDS}s")
+
+    # Write webhook URL to local-only file so the dashboard can send browser alerts.
+    # This file is gitignored — the URL never reaches GitHub.
+    _dc_path = os.path.join("docs", "discord_config.json")
+    with open(_dc_path, "w") as _f:
+        json.dump({"webhook_url": config.DISCORD_WEBHOOK_URL}, _f)
+    print(f"[run_local] Discord config written to {_dc_path}")
 
     mt5_executor.connect()
     auto_tuner.init_baseline()
