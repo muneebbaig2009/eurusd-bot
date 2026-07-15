@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-15T11:12:12.112964+00:00",
+  "updated_at": "2026-07-15T11:17:15.752395+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
@@ -53,10 +53,10 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-15T11:12:11.976469+00:00",
+    "checked_at": "2026-07-15T11:17:15.641517+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.34008
+    "current_price": 1.33961
   },
   "signals": []
 }
