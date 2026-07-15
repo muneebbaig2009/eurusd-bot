@@ -55,6 +55,19 @@ def _sym(symbol: str) -> str:
     return symbol.replace("/", "")
 
 
+def _fill_mode(sym: str) -> int:
+    """Return the first supported ORDER_FILLING_* mode for this symbol."""
+    info = mt5.symbol_info(sym)
+    if info is None:
+        return mt5.ORDER_FILLING_FOK
+    fm = info.filling_mode
+    if fm & 4:
+        return mt5.ORDER_FILLING_RETURN
+    if fm & 2:
+        return mt5.ORDER_FILLING_IOC
+    return mt5.ORDER_FILLING_FOK
+
+
 def open_trade(symbol: str, direction: str, lot: float,
                sl: float, tp: float, magic: int) -> int | None:
     """Send a market order with SL and TP already set.
@@ -92,7 +105,7 @@ def open_trade(symbol: str, direction: str, lot: float,
         "magic":        magic,
         "comment":      f"eurusd-bot #{magic}",
         "type_time":    mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_RETURN,
+        "type_filling": _fill_mode(sym),
     }
 
     result = mt5.order_send(request)
@@ -174,7 +187,7 @@ def close_position(ticket: int) -> bool:
         "magic":        pos.magic,
         "comment":      f"eurusd-bot close #{ticket}",
         "type_time":    mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_RETURN,
+        "type_filling": _fill_mode(sym),
     }
 
     result = mt5.order_send(request)
