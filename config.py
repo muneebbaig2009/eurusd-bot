@@ -1,8 +1,13 @@
-"""Central configuration. All secrets come from environment variables."""
+"""Central configuration. All secrets come from environment variables or .env file."""
 import os
 import re
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+except ImportError:
+    pass
 
-# --- Secrets (set these as environment variables / GitHub Secrets) ---
+# --- Secrets (set in .env file or as environment variables / GitHub Secrets) ---
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 
 # --- MT5 credentials ---
