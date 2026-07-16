@@ -39,13 +39,19 @@ def trend_strength(df) -> int:
     return int(max(0, min(100, round(val))))
 
 
-def confidence_pct(db, primary_score, cfg) -> int:
-    """Map the weighted score to a readable confidence %, normalised against
-    the current sum of technique weights so it adapts as weights learn."""
-    total_weight = sum(storage.get_weight(db, t) for t in TECHNIQUES)
-    if total_weight <= 0:
+def confidence_pct(db, primary_score, cfg, active_votes: dict = None) -> int:
+    """Map the weighted score to confidence %, normalised against active
+    (non-zero voting) technique weights only.  Neutral techniques sitting at
+    vote=0 have no opinion and should not dilute confidence."""
+    if active_votes:
+        active_weight = sum(
+            storage.get_weight(db, t) for t, v in active_votes.items() if v != 0
+        )
+    else:
+        active_weight = sum(storage.get_weight(db, t) for t in TECHNIQUES)
+    if active_weight <= 0:
         return cfg["CONF_MIN"]
-    ratio = abs(primary_score) / total_weight
+    ratio = abs(primary_score) / active_weight
     span  = cfg["CONF_MAX"] - cfg["CONF_MIN"]
     return int(round(cfg["CONF_MIN"] + ratio * span))
 
@@ -80,7 +86,7 @@ def generate_signal(db, timeframes: dict, cfg: dict = None):
     if adx < cfg["MIN_ADX"]:
         return None
 
-    conf = confidence_pct(db, primary_score, cfg)
+    conf = confidence_pct(db, primary_score, cfg, active_votes=tf_votes[cfg["PRIMARY_TF"]])
     if conf < cfg["MIN_CONFIDENCE"]:
         return None
 

@@ -97,8 +97,8 @@ PAIR_CONFIG = {
         "SL_ATR_MULT":          2.5,   # wider: absorbs GBP/USD noise
         "TP1_ATR_MULT":         2.0,   # wider: captures momentum swings
         "TP2_ATR_MULT":         4.0,
-        "SIGNAL_THRESHOLD":     1.2,   # stricter: GBP/USD more unpredictable
-        "MIN_CONFIDENCE":       65,    # stricter
+        "SIGNAL_THRESHOLD":     1.0,   # aligned with EUR/USD; daily confirmation is the quality filter
+        "MIN_CONFIDENCE":       60,    # aligned with EUR/USD; confidence now uses active techniques only
         "MIN_ADX":              15,    # stronger trend required
         "SIGNAL_COOLDOWN_BARS": 6,     # longer cooldown between signals
     },
