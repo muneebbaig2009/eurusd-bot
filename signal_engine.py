@@ -23,16 +23,16 @@ def score_timeframe(db, df) -> tuple:
     return score, votes
 
 
-def compute_atr(df, length=14) -> float:
+def compute_atr(df, length=10) -> float:
     atr = ta.atr(df["high"], df["low"], df["close"], length=length)
     if atr is None or atr.dropna().empty:
         return df["close"].iloc[-1] * 0.001
     return float(atr.iloc[-1])
 
 
-def trend_strength(df) -> int:
+def trend_strength(df, length=14) -> int:
     """0-100 score of how strongly price is trending, via ADX (falls back to 50)."""
-    adx = ta.adx(df["high"], df["low"], df["close"], length=14)
+    adx = ta.adx(df["high"], df["low"], df["close"], length=length)
     if adx is None or adx.dropna().empty:
         return 50
     val = float(adx.iloc[-1, 0])
@@ -82,7 +82,8 @@ def generate_signal(db, timeframes: dict, cfg: dict = None):
     direction  = "BUY" if primary_score > 0 else "SELL"
     primary_df = timeframes[cfg["PRIMARY_TF"]]
 
-    adx = trend_strength(primary_df)
+    adx_period = cfg.get("ADX_PERIOD", 14)
+    adx = trend_strength(primary_df, length=adx_period)
     if adx < cfg["MIN_ADX"]:
         return None
 

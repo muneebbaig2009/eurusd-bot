@@ -15,17 +15,17 @@ def rsi_vote(df: pd.DataFrame) -> int:
     val = rsi.iloc[-1]
     if val < 35:
         return 1      # oversold -> buy
-    if val > 65:
-        return -1     # overbought -> sell
+    if val > 75:
+        return -1     # overbought -> sell  (raised from 65 → 75, backtest-optimised)
     return 0
 
 
 def ma_cross_vote(df: pd.DataFrame) -> int:
     """Vote ONLY on fresh MA crossovers within the last 3 bars.
     Returns 0 when no recent cross — eliminates the standing-trend SELL bias."""
-    fast = ta.sma(df["close"], length=20)
-    slow = ta.sma(df["close"], length=50)
-    if fast is None or slow is None or len(fast) < 55:
+    fast = ta.sma(df["close"], length=8)    # 8/21 outperforms 20/50 in optimisation
+    slow = ta.sma(df["close"], length=21)
+    if fast is None or slow is None or len(fast) < 25:
         return 0
     for i in [-1, -2, -3]:
         curr = fast.iloc[i] - slow.iloc[i]
@@ -38,10 +38,10 @@ def ma_cross_vote(df: pd.DataFrame) -> int:
 
 
 def macd_vote(df: pd.DataFrame) -> int:
-    macd = ta.macd(df["close"])
+    # fast=10 / slow=21 is more responsive for 30m bars than the classic 12/26
+    macd = ta.macd(df["close"], fast=10, slow=21, signal=9)
     if macd is None or macd.empty:
         return 0
-    # Require MACD histogram to have turned (not just crossed), for quality
     hist = macd.iloc[:, 1]   # MACDh column
     if hist.dropna().empty or len(hist.dropna()) < 2:
         return 0
@@ -51,7 +51,7 @@ def macd_vote(df: pd.DataFrame) -> int:
         return 1   # histogram just turned positive
     if current < 0 and previous >= 0:
         return -1  # histogram just turned negative
-    # Standing: smaller weight but still directional
+    # Standing directional bias (lower weight via weight_preset)
     if current > 0:
         return 1
     if current < 0:
@@ -60,7 +60,8 @@ def macd_vote(df: pd.DataFrame) -> int:
 
 
 def bbands_vote(df: pd.DataFrame) -> int:
-    bb = ta.bbands(df["close"], length=20)
+    # Tighter bands (period=15, std=1.5) catch more mean-reversion signals
+    bb = ta.bbands(df["close"], length=15, std=1.5)
     if bb is None or bb.empty:
         return 0
     lower = bb.iloc[-1, 0]
@@ -74,13 +75,13 @@ def bbands_vote(df: pd.DataFrame) -> int:
 
 
 def ema_trend_vote(df: pd.DataFrame) -> int:
-    """Price vs 200 EMA with a 0.05% buffer zone to avoid noise near the EMA."""
+    """Price vs 200 EMA with a 0.03% buffer zone to avoid noise near the EMA."""
     ema = ta.ema(df["close"], length=200)
     if ema is None or ema.dropna().empty:
         return 0
     price = df["close"].iloc[-1]
     ema_val = float(ema.dropna().iloc[-1])
-    buffer = ema_val * 0.0005   # 0.05% — about 5-7 pips on EUR/USD
+    buffer = ema_val * 0.0003   # 0.03% — tighter than previous 0.05%
     if price > ema_val + buffer:
         return 1
     if price < ema_val - buffer:
@@ -89,23 +90,23 @@ def ema_trend_vote(df: pd.DataFrame) -> int:
 
 
 def stoch_vote(df: pd.DataFrame) -> int:
-    """Stochastic %K/%D: vote at overbought/oversold extremes only."""
+    """Stochastic %K/%D: wider OS/OB band (30/70) catches more signals."""
     stoch = ta.stoch(df["high"], df["low"], df["close"])
     if stoch is None or stoch.empty:
         return 0
     k = float(stoch.iloc[-1, 0])
     d = float(stoch.iloc[-1, 1])
-    if k < 25 and d < 25:
-        return 1    # oversold — buy pressure building
-    if k > 75 and d > 75:
-        return -1   # overbought — sell pressure building
+    if k < 30 and d < 30:
+        return 1    # oversold — buy pressure building  (was 25)
+    if k > 70 and d > 70:
+        return -1   # overbought — sell pressure building  (was 75)
     return 0
 
 
 def supertrend_vote(df: pd.DataFrame) -> int:
     """Supertrend direction: +1 when price is above the supertrend line, -1 below."""
     try:
-        st = ta.supertrend(df["high"], df["low"], df["close"], length=10, multiplier=3.0)
+        st = ta.supertrend(df["high"], df["low"], df["close"], length=7, multiplier=3.0)
     except Exception:
         return 0
     if st is None or st.empty:

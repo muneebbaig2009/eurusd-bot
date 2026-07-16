@@ -50,6 +50,16 @@ def check_open_signals(symbol, db):
         _close_and_notify(symbol, db, s, status, close_price)
 
 
+def _session_active(pair_cfg: dict) -> bool:
+    """Return True if the current UTC hour is within the configured trading session."""
+    sess = pair_cfg.get("SESSION_FILTER", "all")
+    if not sess or sess == "all":
+        return True
+    now_hour = datetime.now(timezone.utc).hour
+    hours = config.SESSION_HOURS.get(sess, set(range(24)))
+    return now_hour in hours
+
+
 def try_new_signal(symbol, db, timeframes):
     """Returns a cycle_status dict describing why a signal was or wasn't generated."""
     status = {"checked_at": datetime.now(timezone.utc).isoformat()}
@@ -61,6 +71,14 @@ def try_new_signal(symbol, db, timeframes):
         return status
 
     pair_cfg = config.get_pair_config(symbol)
+
+    # Session filter: only signal during configured market hours
+    if not _session_active(pair_cfg):
+        sess = pair_cfg.get("SESSION_FILTER", "all")
+        status.update(signal_result="blocked_session",
+                      reason=f"Outside {sess} session (UTC hour {datetime.now(timezone.utc).hour})")
+        print(f"[{symbol}] Outside trading session ({sess}) — skipping signal check.")
+        return status
 
     last_close = storage.last_close_time(db)
     if last_close is not None:
