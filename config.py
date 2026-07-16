@@ -79,6 +79,20 @@ MIN_ADX = 12
 # Interpreted as number of primary-timeframe bars (converted to hours in main.py).
 SIGNAL_COOLDOWN_BARS = 4
 
+# ── Trading mode ─────────────────────────────────────────────────────────────
+# 360-day intraday vs interday comparison (2026-07-16):
+#   Intraday (overlap session, M30+H1) composite score: +27.2
+#   Interday (swing, H4+D1)           composite score: -43.7
+#   Interday gen_ratio 0.31 (poor generalisation) vs intraday 1.49 (improved OOS)
+#   Interday failed spectacularly in test: PF 0.42, DD 99.9%, ROI -88.5%
+#   Decision: intraday confirmed as the correct trading mode.
+TRADING_MODE = "intraday"
+
+# Safety: close any trade that has been open longer than this (hours).
+# Prevents accidental overnight holding for an intraday strategy.
+# Set to 0 to disable.
+MAX_HOLD_HOURS = 8
+
 # Default timeframe stack — overridden per pair below
 CONFIRM_TIMEFRAMES = ["30m", "1h"]
 PRIMARY_TF         = "30m"
@@ -157,6 +171,8 @@ def get_pair_config(symbol: str) -> dict:
         "CONFIRM_TIMEFRAMES":   CONFIRM_TIMEFRAMES,
         "PRIMARY_TF":           PRIMARY_TF,
         "SESSION_FILTER":       SESSION_FILTER,
+        "TRADING_MODE":         TRADING_MODE,
+        "MAX_HOLD_HOURS":       MAX_HOLD_HOURS,
     }
     return {**base, **PAIR_CONFIG.get(symbol, {})}
 

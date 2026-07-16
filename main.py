@@ -37,17 +37,46 @@ def _close_and_notify(symbol, db, s, status, close_price):
 
 
 def check_open_signals(symbol, db):
-    """Query MT5 terminal to detect closed positions."""
+    """Query MT5 terminal to detect closed positions and enforce EOD hold limit."""
     import mt5_executor
+    pair_cfg      = config.get_pair_config(symbol)
+    max_hold_h    = pair_cfg.get("MAX_HOLD_HOURS", 0)
+
     for s in storage.open_signals(db):
         ticket = s.get("mt5_ticket")
         if ticket is None:
             continue
+
+        # Primary check: has MT5 already closed the position (TP/SL hit)?
         result = mt5_executor.get_position_result(ticket)
-        if result is None:
+        if result is not None:
+            status, close_price = result
+            _close_and_notify(symbol, db, s, status, close_price)
             continue
-        status, close_price = result
-        _close_and_notify(symbol, db, s, status, close_price)
+
+        # EOD safeguard: close intraday positions that exceed MAX_HOLD_HOURS
+        if max_hold_h > 0 and s.get("created_at"):
+            try:
+                opened_at = datetime.fromisoformat(str(s["created_at"]))
+                if opened_at.tzinfo is None:
+                    opened_at = opened_at.replace(tzinfo=timezone.utc)
+                hold_h = (datetime.now(timezone.utc) - opened_at).total_seconds() / 3600
+                if hold_h >= max_hold_h:
+                    print(f"[{symbol}] #{s['id']} open {hold_h:.1f}h ≥ {max_hold_h}h limit — EOD close")
+                    if mt5_executor.close_position(ticket):
+                        # Give MT5 a moment to record the deal, then fetch outcome
+                        import time; time.sleep(0.5)
+                        result2 = mt5_executor.get_position_result(ticket)
+                        if result2:
+                            status, close_price = result2
+                        else:
+                            # Fallback: classify by entry vs current price
+                            entry = s["entry"]
+                            close_price = entry   # neutral fallback
+                            status = "LOSS"       # conservative
+                        _close_and_notify(symbol, db, s, status, close_price)
+            except Exception as e:
+                print(f"[{symbol}] EOD close error #{s['id']}: {e}")
 
 
 def _session_active(pair_cfg: dict) -> bool:
