@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-16T10:54:49.276102+00:00",
+  "updated_at": "2026-07-16T10:58:31.600707+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -9,11 +9,11 @@
     "win_rate": 0.0
   },
   "weights": {
-    "bbands": 1.8000000000000007,
-    "ema_trend": 0.2,
-    "ma_cross": 1.05,
-    "macd": 0.2,
-    "rsi": 1.4000000000000004,
+    "bbands": 1.0,
+    "ema_trend": 1.0,
+    "ma_cross": 1.0,
+    "macd": 1.0,
+    "rsi": 1.0,
     "stoch": 1.0,
     "supertrend": 1.0
   },
@@ -37,10 +37,10 @@
   "mt5_account": {
     "login": 109677040,
     "balance": 100000.0,
-    "equity": 99824.32,
-    "profit": -175.68,
+    "equity": 99665.11,
+    "profit": -334.89,
     "margin": 14250.81,
-    "free_margin": 85573.51,
+    "free_margin": 85414.3,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -58,15 +58,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-16T10:54:49.218555+00:00",
+    "checked_at": "2026-07-16T10:58:31.402476+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14645
+    "current_price": 1.14613
   },
   "laptop_battery": {
-    "percent": 69,
+    "percent": 67,
     "charging": false,
-    "secsleft": 6761
+    "secsleft": 7173
   },
   "signals": [
     {
