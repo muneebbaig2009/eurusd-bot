@@ -80,12 +80,27 @@ MIN_ADX = 12
 SIGNAL_COOLDOWN_BARS = 4
 
 # ── Trading mode ─────────────────────────────────────────────────────────────
-# 360-day intraday vs interday comparison (2026-07-16):
+# 360-day intraday vs interday comparison (2026-07-16) — run A:
 #   Intraday (overlap session, M30+H1) composite score: +27.2
 #   Interday (swing, H4+D1)           composite score: -43.7
 #   Interday gen_ratio 0.31 (poor generalisation) vs intraday 1.49 (improved OOS)
 #   Interday failed spectacularly in test: PF 0.42, DD 99.9%, ROI -88.5%
-#   Decision: intraday confirmed as the correct trading mode.
+#
+# 1000-day study (2026-07-16) — run B: train 700d / test 300d, 200+100 random configs
+#   Data range: 2023-10-10 → 2026-07-16 (EURUSD+GBPUSD, 34k M30 bars)
+#   Intraday OOS score: -36.38  |  Interday OOS score: -47.79  → INTRADAY WINS
+#   Interday gen_ratio -2.41: catastrophic overfitting confirmed for the 2nd time
+#   Interday OOS: PF 0.74, ROI -111%, DD 116% — account wipeout in test period
+#
+# Position management study (5 configs, full 1000d):
+#   ALL five configs produced identical outcomes (n=51, PF=0.45, DD=14%)
+#   Root cause: 0.054 trades/day is well below single-position capacity;
+#   minimum lot floor ($0.01) means lot scaling has no effect on a $100 account.
+#   CONFIRMED: single position per pair is the correct and sufficient setting.
+#
+# Session: London-NY overlap (12-17 UTC) independently re-discovered 3x as best
+# Entry TF: M30 independently re-discovered 3x as best entry timeframe
+# Decision: intraday confirmed. Existing 885baff targeted config is the best found.
 TRADING_MODE = "intraday"
 
 # Safety: close any trade that has been open longer than this (hours).
