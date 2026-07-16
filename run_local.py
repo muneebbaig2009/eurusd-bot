@@ -8,6 +8,8 @@ Usage:
 
 Stop with Ctrl+C. MT5 terminal must be open and logged in before starting.
 """
+import sys
+sys.stdout.reconfigure(line_buffering=True)  # flush every \n even when redirected to file
 import json
 import os
 import time
