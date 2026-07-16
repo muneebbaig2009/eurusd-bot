@@ -67,8 +67,8 @@ def try_new_signal(symbol, db, timeframes):
         now_utc = datetime.now(timezone.utc)
         if last_close.tzinfo is None:
             last_close = last_close.replace(tzinfo=timezone.utc)
-        elapsed = (now_utc - last_close).total_seconds() / 3600
-        cooldown = pair_cfg["SIGNAL_COOLDOWN_BARS"]
+        elapsed  = (now_utc - last_close).total_seconds() / 3600
+        cooldown = config.cooldown_hours(symbol)   # bars × bar_size_hours
         if elapsed < cooldown:
             remaining = round(cooldown - elapsed, 1)
             status.update(signal_result="blocked_cooldown",
@@ -132,7 +132,8 @@ def run_pair(symbol):
 
     # Attach current price from primary timeframe
     try:
-        df = timeframes.get(config.PRIMARY_TF)
+        primary_tf = config.get_pair_config(symbol).get("PRIMARY_TF", config.PRIMARY_TF)
+        df = timeframes.get(primary_tf)
         if df is not None and not df.empty:
             cycle_status["current_price"] = round(float(df["close"].iloc[-1]), 5)
     except Exception:

@@ -40,20 +40,27 @@ def data_json_path(symbol: str) -> str:
     return f"docs/data_{slug(symbol)}.json"
 
 
-# How many candles to request per timeframe
-CANDLE_COUNT = 200
+# How many candles to request per timeframe (used as default)
+CANDLE_COUNT = 300
+
+# Per-timeframe bar counts — shorter timeframes need more bars for EMA(200) warmup
+CANDLE_COUNT_MAP = {
+    "15m":  300,
+    "30m":  300,
+    "1h":   300,
+    "1day": 300,
+}
 
 # --- Signal logic ---
 # Combined weighted score must exceed this (absolute) to fire a signal.
-SIGNAL_THRESHOLD = 1.0
+SIGNAL_THRESHOLD = 1.5
 
 # ATR multipliers for stop-loss (volatility based)
-SL_ATR_MULT = 2.0
+SL_ATR_MULT = 1.5
 
 # Two take-profit targets: a near target (TP1) and a far target (TP2).
-# TP1 is set wider than SL so the primary target carries positive risk-reward.
 TP1_ATR_MULT = 1.5
-TP2_ATR_MULT = 3.5
+TP2_ATR_MULT = 3.0
 
 # Kept for backwards compatibility (TP1 is the primary target used for win/loss).
 TP_ATR_MULT = TP1_ATR_MULT
@@ -63,44 +70,54 @@ CONF_MIN = 40
 CONF_MAX = 95
 
 # Minimum confidence % required to post a signal (filters low-conviction setups).
-MIN_CONFIDENCE = 60
+MIN_CONFIDENCE = 55
 
 # Minimum ADX value to allow a signal (filters choppy, non-trending markets).
 MIN_ADX = 12
 
 # Bars to wait after a signal closes before allowing a new entry.
-# Prevents chain-losses from immediately re-entering after a quick SL hit.
+# Interpreted as number of primary-timeframe bars (converted to hours in main.py).
 SIGNAL_COOLDOWN_BARS = 4
 
-# Timeframes that must agree for a signal to be valid (multi-tf confirmation)
-CONFIRM_TIMEFRAMES = ["1h", "1day"]
+# Default timeframe stack — overridden per pair below
+CONFIRM_TIMEFRAMES = ["15m", "1h"]
+PRIMARY_TF         = "15m"
 
-# Primary timeframe used for entry price + ATR
-PRIMARY_TF = "1h"
+# Bar size in hours for each supported timeframe (used to compute cooldown hours)
+TF_BAR_HOURS = {
+    "5min": 1/12,
+    "15m":  0.25,
+    "30m":  0.5,
+    "1h":   1.0,
+    "1day": 24.0,
+}
 
 # --- Per-pair strategy overrides ---
-# EUR/USD: backtest-optimised, lower volatility (~30-50 pip/day), tight spreads
-# GBP/USD: ~40% more volatile (~60-90 pip/day), wider spreads, momentum-driven
-#   → wider ATR stops to handle noise, wider TP for momentum moves,
-#     stricter threshold and ADX to filter lower-quality setups
+# 360-day walk-forward optimisation results (equal technique weights, 2% risk):
+#   EUR/USD  15m+1h  threshold=1.5  R:R=1.0  -> PF 1.109  +$64.33  1.66 trades/day
+#   GBP/USD  30m+1h  threshold=1.5  R:R=0.75 -> PF 1.167  +$56.53  0.99 trades/day
 PAIR_CONFIG = {
     "EUR/USD": {
-        "SL_ATR_MULT":          2.0,
-        "TP1_ATR_MULT":         1.5,
-        "TP2_ATR_MULT":         3.5,
-        "SIGNAL_THRESHOLD":     1.0,
-        "MIN_CONFIDENCE":       60,
+        "PRIMARY_TF":           "15m",
+        "CONFIRM_TIMEFRAMES":   ["15m", "1h"],
+        "SL_ATR_MULT":          1.5,
+        "TP1_ATR_MULT":         1.5,   # R:R 1.0 — 360d PF 1.109, WR 52.3%
+        "TP2_ATR_MULT":         3.0,
+        "SIGNAL_THRESHOLD":     1.5,
+        "MIN_CONFIDENCE":       55,
         "MIN_ADX":              12,
-        "SIGNAL_COOLDOWN_BARS": 4,
+        "SIGNAL_COOLDOWN_BARS": 4,     # 4 × 15m = 1h cooldown
     },
     "GBP/USD": {
-        "SL_ATR_MULT":          2.5,   # wider: absorbs GBP/USD noise
-        "TP1_ATR_MULT":         2.0,   # wider: captures momentum swings
-        "TP2_ATR_MULT":         4.0,
-        "SIGNAL_THRESHOLD":     1.0,   # aligned with EUR/USD; daily confirmation is the quality filter
-        "MIN_CONFIDENCE":       60,    # aligned with EUR/USD; confidence now uses active techniques only
-        "MIN_ADX":              15,    # stronger trend required
-        "SIGNAL_COOLDOWN_BARS": 6,     # longer cooldown between signals
+        "PRIMARY_TF":           "30m",
+        "CONFIRM_TIMEFRAMES":   ["30m", "1h"],
+        "SL_ATR_MULT":          2.0,
+        "TP1_ATR_MULT":         1.5,   # R:R 0.75 — 360d PF 1.167, WR 60.2%
+        "TP2_ATR_MULT":         3.0,
+        "SIGNAL_THRESHOLD":     1.5,
+        "MIN_CONFIDENCE":       55,
+        "MIN_ADX":              12,
+        "SIGNAL_COOLDOWN_BARS": 4,     # 4 × 30m = 2h cooldown
     },
 }
 
@@ -121,6 +138,13 @@ def get_pair_config(symbol: str) -> dict:
         "PRIMARY_TF":           PRIMARY_TF,
     }
     return {**base, **PAIR_CONFIG.get(symbol, {})}
+
+
+def cooldown_hours(symbol: str) -> float:
+    """Cooldown in hours = SIGNAL_COOLDOWN_BARS × bar_size for the pair's primary TF."""
+    cfg = get_pair_config(symbol)
+    bar_h = TF_BAR_HOURS.get(cfg["PRIMARY_TF"], 1.0)
+    return cfg["SIGNAL_COOLDOWN_BARS"] * bar_h
 
 # --- Demo account ---
 DEMO_INITIAL_BALANCE = 100.0   # starting balance in USD

@@ -7,6 +7,8 @@ import config
 
 _TF_MAP = {
     "5min": mt5.TIMEFRAME_M5,
+    "15m":  mt5.TIMEFRAME_M15,
+    "30m":  mt5.TIMEFRAME_M30,
     "1h":   mt5.TIMEFRAME_H1,
     "1day": mt5.TIMEFRAME_D1,
 }
@@ -18,8 +20,10 @@ def mt5_symbol(symbol: str) -> str:
 
 
 def fetch_candles(symbol: str, interval: str,
-                  outputsize: int = config.CANDLE_COUNT) -> pd.DataFrame:
-    """Pull `outputsize` candles from MT5. Returns DataFrame sorted oldest→newest."""
+                  outputsize: int = None) -> pd.DataFrame:
+    """Pull candles from MT5. Bar count defaults to CANDLE_COUNT_MAP[interval]."""
+    if outputsize is None:
+        outputsize = config.CANDLE_COUNT_MAP.get(interval, config.CANDLE_COUNT)
     tf  = _TF_MAP[interval]
     sym = mt5_symbol(symbol)
     rates = mt5.copy_rates_from_pos(sym, tf, 0, outputsize)
@@ -33,15 +37,11 @@ def fetch_candles(symbol: str, interval: str,
     return df[["open", "high", "low", "close"]]
 
 
-def resample_3h(df_1h: pd.DataFrame) -> pd.DataFrame:
-    agg = {"open": "first", "high": "max", "low": "min", "close": "last"}
-    return df_1h.resample("3h").agg(agg).dropna()
-
-
 def get_all_timeframes(symbol: str) -> dict:
-    """Return {tf_name: DataFrame} for 5min, 1h, 3h, 1day — sourced from MT5."""
+    """Return {tf_name: DataFrame} for every timeframe the pair's config needs."""
+    pair_cfg = config.get_pair_config(symbol)
+    needed   = set(pair_cfg.get("CONFIRM_TIMEFRAMES", ["1h", "1day"]))
     out = {}
-    for name in ("5min", "1h", "1day"):
+    for name in sorted(needed):
         out[name] = fetch_candles(symbol, name)
-    out["3h"] = resample_3h(out["1h"])
     return out
