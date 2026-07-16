@@ -82,7 +82,8 @@ $proc = Start-Process `
     -WorkingDirectory $BOT_DIR `
     -RedirectStandardOutput $LOG_OUT `
     -RedirectStandardError  $LOG_ERR `
-    -PassThru -NoNewWindow
+    -WindowStyle Hidden `
+    -PassThru
 
 if (-not $proc) {
     FAIL "Bot" "FAILED TO START"
