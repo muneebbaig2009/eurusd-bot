@@ -35,6 +35,26 @@ def _close_and_notify(symbol, db, s, status, close_price):
     print(f"[{symbol}] #{s['id']} {status} @ {close_price} "
           f"| Lots {s.get('lot_size')} | P&L {pnl_str} | Balance ${new_bal:.2f}")
 
+    # ── Adaptive engine: record trade outcome ─────────────────────────────────
+    try:
+        import adaptive.scheduler as _adp
+        opened_at = s.get("created_at")
+        hold_h = 0.0
+        if opened_at:
+            from datetime import datetime, timezone
+            t0 = datetime.fromisoformat(str(opened_at))
+            if t0.tzinfo is None:
+                t0 = t0.replace(tzinfo=timezone.utc)
+            hold_h = (datetime.now(timezone.utc) - t0).total_seconds() / 3600
+        _adp.on_trade_closed(
+            symbol=symbol, db=db, signal_id=s["id"],
+            direction=s["direction"], won=(status == "WIN"),
+            close_price=close_price, entry=s["entry"],
+            sl=s.get("sl", 0.0), pnl=pnl, hold_hours=hold_h,
+        )
+    except Exception as _e:
+        print(f"[{symbol}] adaptive.on_trade_closed error (non-fatal): {_e}")
+
 
 def check_open_signals(symbol, db):
     """Query MT5 terminal to detect closed positions and enforce EOD hold limit."""
@@ -136,6 +156,13 @@ def try_new_signal(symbol, db, timeframes):
     balance = acct.get("balance", config.DEMO_INITIAL_BALANCE) if acct else config.DEMO_INITIAL_BALANCE
     sig["lot_size"] = storage.calc_lot_size(balance, sig["entry"], sig["sl"])
     sid = storage.log_signal(db, sig)
+
+    # ── Adaptive engine: record full signal context ───────────────────────────
+    try:
+        import adaptive.scheduler as _adp
+        _adp.record_signal_context(db, sid, sig, symbol=symbol)
+    except Exception as _e:
+        print(f"[{symbol}] adaptive.record_signal_context error (non-fatal): {_e}")
     print(f"[{symbol}] Signal #{sid}: {sig['direction']} @ {sig['entry']} "
           f"| Lots {sig['lot_size']} (2% of ${balance:,.2f}, conf {sig['confidence']}%, R:R 1:{sig['rr']})")
     tp = sig.get("tp1") or sig["tp"]
@@ -188,6 +215,14 @@ def run_pair(symbol):
 
     exporter.export(symbol, cycle_status=cycle_status)
     print(f"[{symbol}] Cycle complete. Weights:", storage.all_weights(db))
+
+    # ── Adaptive engine: cycle-level checks (shadow rollbacks etc.) ───────────
+    try:
+        import adaptive.scheduler as _adp
+        _adp.run_cycle(symbol=symbol, db=db,
+                       pair_cfg=config.get_pair_config(symbol))
+    except Exception as _e:
+        print(f"[{symbol}] adaptive.run_cycle error (non-fatal): {_e}")
 
 
 def main():

@@ -218,3 +218,34 @@ LEARN_RATE = 0.05
 # Keep weights inside this band so nothing dominates or dies completely
 MIN_WEIGHT = 0.2
 MAX_WEIGHT = 3.0
+
+# ── Adaptive Strategy Optimization Engine ────────────────────────────────────
+# Master switch — set False to disable ALL adaptive behaviour instantly.
+ADAPTIVE_ENABLED = True
+
+# Minimum closed-trade count before any parameter is updated.
+ADAPTIVE_MIN_SAMPLE = 30
+
+# Run batch parameter optimization every N closed trades.
+ADAPTIVE_OPTIMIZE_EVERY = 50
+
+# Run batch weight rebalancing every N closed trades.
+ADAPTIVE_WEIGHT_BATCH = 50
+
+# Minimum relative improvement required to accept a parameter change (5 %).
+ADAPTIVE_MIN_IMPROVEMENT = 0.05
+
+# Maximum fractional change per update cycle (20 % of parameter range).
+ADAPTIVE_MAX_CHANGE_PCT = 0.20
+
+# Shadow validation period: live trades to monitor after each param change.
+ADAPTIVE_SHADOW_TRADES = 25
+
+# Rollback if shadow avg_R drops more than this vs pre-change baseline.
+ADAPTIVE_ROLLBACK_THRESHOLD = -0.15   # −15 %
+
+# EWMA decay factor for rolling statistics (higher = more weight on recents).
+ADAPTIVE_EWMA_ALPHA = 0.94
+
+# Rolling window size for in-memory statistics.
+ADAPTIVE_WINDOW = 100
