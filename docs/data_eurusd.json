@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-16T12:19:53.372837+00:00",
+  "updated_at": "2026-07-16T14:32:24.806848+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -37,10 +37,10 @@
   "mt5_account": {
     "login": 109677040,
     "balance": 100000.0,
-    "equity": 100021.96,
-    "profit": 21.96,
+    "equity": 100032.94,
+    "profit": 32.94,
     "margin": 14250.81,
-    "free_margin": 85771.15,
+    "free_margin": 85782.13,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -58,15 +58,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-16T12:19:53.308156+00:00",
+    "checked_at": "2026-07-16T14:32:24.751801+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14648
+    "current_price": 1.14505
   },
   "laptop_battery": {
-    "percent": 61,
+    "percent": 82,
     "charging": false,
-    "secsleft": 9752
+    "secsleft": 4628
   },
   "signals": [
     {
