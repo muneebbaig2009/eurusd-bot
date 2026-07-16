@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-16T11:42:35.617265+00:00",
+  "updated_at": "2026-07-16T11:44:27.514700+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
@@ -9,13 +9,13 @@
     "win_rate": 0.0
   },
   "weights": {
-    "bbands": 1.0,
-    "ema_trend": 1.0,
-    "ma_cross": 1.0,
-    "macd": 1.0,
-    "rsi": 1.0,
-    "stoch": 1.0,
-    "supertrend": 1.0
+    "bbands": 1.5,
+    "ema_trend": 0.8,
+    "ma_cross": 0.8,
+    "macd": 1.5,
+    "rsi": 2.0,
+    "stoch": 2.0,
+    "supertrend": 0.8
   },
   "equity": [],
   "demo": {
@@ -29,15 +29,37 @@
     ],
     "per_signal_pnl": {}
   },
-  "mt5_account": {},
-  "mt5_trades": [],
+  "mt5_account": {
+    "login": 109677040,
+    "balance": 100000.0,
+    "equity": 99610.21,
+    "profit": -389.79,
+    "margin": 14250.81,
+    "free_margin": 85359.4,
+    "currency": "USD",
+    "leverage": 100,
+    "server": "MetaQuotes-Demo"
+  },
+  "mt5_trades": [
+    {
+      "ticket": 9570220998,
+      "time": "2026-07-15T10:52:59+00:00",
+      "symbol": "EURUSD",
+      "type": "SELL",
+      "volume": 0.01,
+      "price": 1.1424,
+      "profit": -0.02,
+      "comment": "eurusd-bot close #9570220639"
+    }
+  ],
   "cycle_status": {
-    "checked_at": "2026-07-16T11:42:35.616068+00:00",
-    "signal_result": "data_error",
-    "reason": "MT5 data fetch failed: MT5: no candle data for GBPUSD 1h. Error: (-10001, 'IPC send failed')"
+    "checked_at": "2026-07-16T11:44:27.511687+00:00",
+    "signal_result": "blocked_open",
+    "reason": "Open position exists \u2014 waiting for it to close",
+    "current_price": 1.35028
   },
   "laptop_battery": {
-    "percent": 50,
+    "percent": 52,
     "charging": true,
     "secsleft": null
   },
