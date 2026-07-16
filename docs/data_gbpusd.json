@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-16T09:41:00.471198+00:00",
+  "updated_at": "2026-07-16T09:45:33.837306+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
     "losses": 0,
-    "open": 0,
-    "total": 0,
+    "open": 1,
+    "total": 1,
     "win_rate": 0.0
   },
   "weights": {
@@ -34,8 +34,8 @@
     "balance": 100000.0,
     "equity": 100000.0,
     "profit": 0.0,
-    "margin": 0.0,
-    "free_margin": 100000.0,
+    "margin": 14250.81,
+    "free_margin": 85749.19,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -53,15 +53,54 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-16T09:41:00.417570+00:00",
-    "signal_result": "no_conditions",
-    "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.35091
+    "checked_at": "2026-07-16T09:45:32.630779+00:00",
+    "signal_result": "generated",
+    "signal_id": 13,
+    "direction": "BUY",
+    "entry": 1.35099,
+    "lot_size": 5.49,
+    "confidence": 70,
+    "reason": "Signal #13 BUY @ 1.35099 | 5.49L",
+    "current_price": 1.35099
   },
   "laptop_battery": {
-    "percent": 98,
+    "percent": 96,
     "charging": false,
-    "secsleft": 15225
+    "secsleft": 17020
   },
-  "signals": []
+  "signals": [
+    {
+      "id": 13,
+      "created_at": "2026-07-16T09:45:32.698996+00:00",
+      "direction": "BUY",
+      "entry": 1.35099,
+      "tp": 1.3539,
+      "sl": 1.34735,
+      "score": 1.1,
+      "contributors": {
+        "rsi": 0,
+        "ma_cross": 0,
+        "macd": -1,
+        "bbands": 0,
+        "ema_trend": 1,
+        "stoch": 0,
+        "supertrend": 1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.3539,
+      "tp2": 1.35682,
+      "confidence": 70,
+      "rr": 0.8,
+      "trend_strength": 43,
+      "timeframe": "1h",
+      "lot_size": 5.49,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
+      "pnl": null,
+      "balance_after": null
+    }
+  ]
 }
