@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-16T14:42:37.086763+00:00",
+  "updated_at": "2026-07-16T14:47:41.596807+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
@@ -29,39 +29,17 @@
     ],
     "per_signal_pnl": {}
   },
-  "mt5_account": {
-    "login": 109677040,
-    "balance": 100000.0,
-    "equity": 99247.69,
-    "profit": -752.31,
-    "margin": 58646.94,
-    "free_margin": 40600.75,
-    "currency": "USD",
-    "leverage": 100,
-    "server": "MetaQuotes-Demo"
-  },
-  "mt5_trades": [
-    {
-      "ticket": 9570220998,
-      "time": "2026-07-15T10:52:59+00:00",
-      "symbol": "EURUSD",
-      "type": "SELL",
-      "volume": 0.01,
-      "price": 1.1424,
-      "profit": -0.02,
-      "comment": "eurusd-bot close #9570220639"
-    }
-  ],
+  "mt5_account": {},
+  "mt5_trades": [],
   "cycle_status": {
-    "checked_at": "2026-07-16T14:42:37.077045+00:00",
-    "signal_result": "blocked_open",
-    "reason": "Open position exists \u2014 waiting for it to close",
-    "current_price": 1.35012
+    "checked_at": "2026-07-16T14:47:41.592959+00:00",
+    "signal_result": "data_error",
+    "reason": "MT5 data fetch failed: MT5: no candle data for GBPUSD 1h. Error: (-10001, 'IPC send failed')"
   },
   "laptop_battery": {
-    "percent": 76,
+    "percent": 72,
     "charging": false,
-    "secsleft": 5675
+    "secsleft": 9090
   },
   "signals": [
     {
