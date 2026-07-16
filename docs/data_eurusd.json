@@ -1,50 +1,75 @@
 {
-  "updated_at": "2026-07-16T19:43:02.207846+00:00",
+  "updated_at": "2026-07-16T19:44:29.775821+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
-    "losses": 1,
-    "open": 1,
+    "losses": 2,
+    "open": 0,
     "total": 2,
     "win_rate": 0.0
   },
   "weights": {
-    "bbands": 1.5,
-    "ema_trend": 0.8,
+    "bbands": 1.45,
+    "ema_trend": 0.75,
     "ma_cross": 0.8,
-    "macd": 1.5,
+    "macd": 1.55,
     "rsi": 2.0,
-    "stoch": 2.0,
-    "supertrend": 0.8
+    "stoch": 1.95,
+    "supertrend": 0.8500000000000001
   },
   "equity": [
-    -1
+    -1,
+    -2
   ],
   "demo": {
     "initial_balance": 100.0,
-    "balance": 100.0,
-    "pnl_total": 0.0,
-    "return_pct": 0.0,
+    "balance": -1899.06,
+    "pnl_total": -1999.06,
+    "return_pct": -1999.1,
     "risk_pct": 2.0,
     "balance_history": [
       100.0,
-      100.0
+      100.0,
+      -1899.06
     ],
     "per_signal_pnl": {
-      "39": 0.0
+      "39": 0.0,
+      "40": -1999.06
     }
   },
-  "mt5_account": {},
-  "mt5_trades": [],
+  "mt5_account": {
+    "login": 109677040,
+    "balance": 96525.43,
+    "equity": 96525.43,
+    "profit": 0.0,
+    "margin": 0.0,
+    "free_margin": 96525.43,
+    "currency": "USD",
+    "leverage": 100,
+    "server": "MetaQuotes-Demo"
+  },
+  "mt5_trades": [
+    {
+      "ticket": 9570220998,
+      "time": "2026-07-15T10:52:59+00:00",
+      "symbol": "EURUSD",
+      "type": "SELL",
+      "volume": 0.01,
+      "price": 1.1424,
+      "profit": -0.02,
+      "comment": "eurusd-bot close #9570220639"
+    }
+  ],
   "cycle_status": {
-    "checked_at": "2026-07-16T19:43:02.198686+00:00",
-    "signal_result": "data_error",
-    "reason": "MT5 data fetch failed: MT5: no candle data for EURUSD 1h. Error: (-10001, 'IPC send failed')"
+    "checked_at": "2026-07-16T19:44:29.632774+00:00",
+    "signal_result": "blocked_session",
+    "reason": "Outside overlap session (UTC hour 19)",
+    "current_price": 1.14377
   },
   "laptop_battery": {
     "percent": 94,
     "charging": false,
-    "secsleft": 14863
+    "secsleft": 11657
   },
   "signals": [
     {
@@ -64,9 +89,9 @@
         "stoch": 1,
         "supertrend": -1
       },
-      "status": "OPEN",
-      "closed_at": null,
-      "close_price": null,
+      "status": "LOSS",
+      "closed_at": "2026-07-16T19:44:28.590186+00:00",
+      "close_price": 1.14329,
       "tp1": 1.14525,
       "tp2": 1.14591,
       "confidence": 57,
@@ -77,8 +102,8 @@
       "trade_num": 1,
       "pair_id": null,
       "breakeven_active": false,
-      "pnl": null,
-      "balance_after": null
+      "pnl": -1999.06,
+      "balance_after": -1899.06
     },
     {
       "id": 39,
