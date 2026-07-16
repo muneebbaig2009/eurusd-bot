@@ -87,19 +87,19 @@ def _push_dashboard():
     try:
         result = subprocess.run(
             ["git", "status", "--porcelain", "docs/"],
-            capture_output=True, text=True
+            capture_output=True, text=True, timeout=30
         )
         if not result.stdout.strip():
             print("[git] Dashboard unchanged — nothing to push")
             return
-        subprocess.run(["git", "add", "docs/"],           check=True)
+        subprocess.run(["git", "add", "docs/"],           check=True, timeout=30)
         subprocess.run(
             ["git", "commit", "-m", "chore: dashboard update [skip ci]"],
-            check=True
+            check=True, timeout=30
         )
         subprocess.run(
             ["git", "push", "origin", "master:main", "--force"],
-            check=True
+            check=True, timeout=60
         )
         print("[git] Dashboard pushed to main")
     except subprocess.CalledProcessError as exc:
