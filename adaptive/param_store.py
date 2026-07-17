@@ -112,13 +112,13 @@ class AdaptiveParamStore:
     # "step" = smallest meaningful perturbation
     DEFAULTS: dict[str, dict] = {
         # ── Signal gates ─────────────────────────────────────────────────────
-        "SIGNAL_THRESHOLD":     {"v": 1.2,    "min": 0.5,    "max": 3.0,   "step": 0.1},
+        "SIGNAL_THRESHOLD":     {"v": 2.0,    "min": 0.5,    "max": 4.0,   "step": 0.1},
         "MIN_ADX":              {"v": 15.0,   "min": 10.0,   "max": 40.0,  "step": 1.0},
         "MIN_CONFIDENCE":       {"v": 55.0,   "min": 40.0,   "max": 80.0,  "step": 2.0},
-        # ── ATR multipliers ──────────────────────────────────────────────────
+        # ── ATR multipliers — updated 2026-07-17 (grid-search winner R:R 2.67)
         "SL_ATR_MULT":          {"v": 1.5,    "min": 0.5,    "max": 3.0,   "step": 0.1},
-        "TP1_ATR_MULT":         {"v": 0.75,   "min": 0.25,   "max": 2.0,   "step": 0.05},
-        "TP2_ATR_MULT":         {"v": 1.5,    "min": 0.5,    "max": 4.0,   "step": 0.1},
+        "TP1_ATR_MULT":         {"v": 4.0,    "min": 0.5,    "max": 8.0,   "step": 0.25},
+        "TP2_ATR_MULT":         {"v": 6.0,    "min": 1.0,    "max": 10.0,  "step": 0.5},
         # ── Timing ───────────────────────────────────────────────────────────
         "SIGNAL_COOLDOWN_BARS": {"v": 2.0,    "min": 1.0,    "max": 10.0,  "step": 1.0},
         "MAX_HOLD_HOURS":       {"v": 8.0,    "min": 2.0,    "max": 24.0,  "step": 1.0},
