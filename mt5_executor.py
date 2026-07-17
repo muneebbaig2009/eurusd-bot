@@ -203,6 +203,31 @@ def close_position(ticket: int) -> bool:
     return True
 
 
+def modify_position(ticket: int, sl: float, tp: float) -> bool:
+    """Modify the SL and TP of an open position."""
+    positions = mt5.positions_get(ticket=ticket)
+    if not positions:
+        print(f"[MT5] No open position with ticket {ticket}")
+        return False
+
+    pos = positions[0]
+    request = {
+        "action":   mt5.TRADE_ACTION_SLTP,
+        "position": ticket,
+        "symbol":   pos.symbol,
+        "sl":       round(sl, 5),
+        "tp":       round(tp, 5),
+    }
+    result = mt5.order_send(request)
+    if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
+        code = result.retcode if result else "None"
+        print(f"[MT5] modify_position failed: retcode={code}  {mt5.last_error()}")
+        return False
+
+    print(f"[MT5] Position {ticket} modified  SL={sl:.5f}  TP={tp:.5f}")
+    return True
+
+
 def get_account_info() -> dict:
     """Return live MT5 account state as a plain dict."""
     info = mt5.account_info()
