@@ -22,8 +22,7 @@ import config
 import storage
 from signal_engine import score_timeframe, compute_atr, trend_strength, confidence_pct
 
-MT5_SYMBOLS   = {"EUR/USD": "EURUSD", "GBP/USD": "GBPUSD"}
-SESSION_HOURS = config.SESSION_HOURS["overlap"]     # {12, 13, 14, 15, 16}
+MT5_SYMBOLS      = {"EUR/USD": "EURUSD", "GBP/USD": "GBPUSD"}
 STARTING_BALANCE = 100.0
 RISK_PCT         = 0.02
 PIP_SIZE         = config.PIP_SIZE
@@ -108,6 +107,8 @@ def scan_outcome(df30m: pd.DataFrame, entry_idx: int, direction: str,
 def backtest_pair(symbol: str, df30m: pd.DataFrame, df1h: pd.DataFrame) -> dict:
     cfg = config.get_pair_config(symbol)
     db  = config.db_path(symbol)
+    sess_name  = cfg.get("SESSION_FILTER", "overlap")
+    sess_hours = config.SESSION_HOURS.get(sess_name, config.SESSION_HOURS["overlap"])
 
     balance     = STARTING_BALANCE
     max_balance = balance
@@ -125,7 +126,7 @@ def backtest_pair(symbol: str, df30m: pd.DataFrame, df1h: pd.DataFrame) -> dict:
         bar_hour = ts.hour
 
         # Session filter
-        if bar_hour not in SESSION_HOURS:
+        if bar_hour not in sess_hours:
             i += 1
             continue
 
@@ -270,7 +271,9 @@ def main():
     print(sep)
     print(f"360-Day Backtest  |  Period ending {now}")
     print(f"Starting balance : ${STARTING_BALANCE:.2f}  |  Risk: {int(RISK_PCT*100)}% per trade")
-    print(f"Session          : London-NY overlap (12-16 UTC)")
+    sess0 = config.get_pair_config("EUR/USD").get("SESSION_FILTER", "overlap")
+    sess_hrs = sorted(config.SESSION_HOURS.get(sess0, []))
+    print(f"Session          : {sess0}  UTC hours {sess_hrs}")
     cfg0 = config.get_pair_config("EUR/USD")
     rr   = round(cfg0["TP1_ATR_MULT"] / cfg0["SL_ATR_MULT"], 2)
     print(f"Primary TF       : {cfg0['PRIMARY_TF']}  |  Confirm: {cfg0['CONFIRM_TIMEFRAMES']}")
@@ -292,13 +295,13 @@ def main():
             print(f"  SKIP: {e}")
             continue
         print(f"  30m bars: {len(df30m):,}  |  1h bars: {len(df1h):,}")
-        print(f"  Range   : {df30m.index[0].date()} → {df30m.index[-1].date()}")
+        print(f"  Range   : {df30m.index[0].date()} to {df30m.index[-1].date()}")
         print(f"  Backtesting …")
 
         r = backtest_pair(symbol, df30m, df1h)
         all_results[symbol] = r
 
-        print(f"\n  ─── {symbol} Results ───────────────────────────────")
+        print(f"\n  --- {symbol} Results -------------------------------------------")
         print(f"  Trades        : {r['n_trades']}  (W {r['wins']}  L {r['losses']}  T {r['timeouts']})")
         print(f"  Win Rate      : {r['win_rate']}%")
         print(f"  Profit Factor : {r['profit_factor']}")
@@ -356,7 +359,7 @@ def main():
     out_path = "backtest_360_results.json"
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2, default=str)
-    print(f"\nFull results saved → {out_path}")
+    print(f"\nFull results saved -> {out_path}")
 
 
 if __name__ == "__main__":

@@ -8,5 +8,6 @@
     "expected_expectancy": 0.41,
     "source": "initial_backtest",
     "timestamp": "2026-07-15T07:35:22.643265+00:00"
-  }
+  },
+  "last_daily": "2026-07-17T07:45:21.671864+00:00"
 }

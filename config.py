@@ -133,6 +133,8 @@ SESSION_HOURS = {
     "ny":        set(range(12, 21)),
     "london_ny": set(range(7, 21)),
     "overlap":   set(range(12, 17)),   # London-NY overlap — highest quality signals
+    "morning":   {6, 7, 8},           # London open (11:00-14:00 PKT / 06:00-09:00 UTC)
+    "dual":      {6, 7, 8} | set(range(12, 17)),  # morning + overlap combined
 }
 
 # --- Per-pair strategy overrides ---
@@ -170,7 +172,7 @@ PAIR_CONFIG = {
         "MIN_ADX":              15,
         "ADX_PERIOD":           14,
         "SIGNAL_COOLDOWN_BARS": 2,
-        "SESSION_FILTER":       "overlap",
+        "SESSION_FILTER":       "overlap"
     },
 }
 
