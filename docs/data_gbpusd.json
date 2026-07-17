@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-17T14:48:51.701088+00:00",
+  "updated_at": "2026-07-17T14:53:55.970943+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
@@ -37,10 +37,10 @@
   "mt5_account": {
     "login": 109677040,
     "balance": 96525.43,
-    "equity": 98010.43,
-    "profit": 1485.0,
+    "equity": 97402.93,
+    "profit": 877.5,
     "margin": 46441.32,
-    "free_margin": 51569.11,
+    "free_margin": 50961.61,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -58,15 +58,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-17T14:48:51.696891+00:00",
+    "checked_at": "2026-07-17T14:53:55.964900+00:00",
     "signal_result": "blocked_open",
     "reason": "Open position exists \u2014 waiting for it to close",
-    "current_price": 1.34533
+    "current_price": 1.34488
   },
   "laptop_battery": {
-    "percent": 37,
+    "percent": 35,
     "charging": false,
-    "secsleft": 5153
+    "secsleft": 5654
   },
   "signals": [
     {
