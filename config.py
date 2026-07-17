@@ -136,35 +136,40 @@ SESSION_HOURS = {
 }
 
 # --- Per-pair strategy overrides ---
-# 360-day comprehensive optimisation (overlap session filter, momentum weights):
-#   EURUSD  30m+1h  threshold=1.2  R:R=0.5  overlap → PF 1.73  WR 76%  Sharpe 4.5
-#   GBPUSD  30m+1h  threshold=1.2  R:R=0.5  overlap → PF 1.24  WR 70%  Sharpe 1.7
-#   Walk-forward gen_ratio 0.95 — strong out-of-sample generalisation
+# 360-day grid-search optimisation (2026-07-17) — 36 SL×TP×Threshold combos:
+#   Ranking metric: (avg_ROI/avg_MaxDD) × avg_PF  (favours return per unit drawdown)
+#   Best combo: SL=1.5, TP=4.0, Threshold=2.0  →  R:R 2.67
+#     EURUSD: ROI +63.62%  PF 1.333  WR 23.4%  MaxDD 10.30%  Ret/DD 6.18
+#     GBPUSD: ROI +58.72%  PF 1.256  WR 24.4%  MaxDD 24.84%  Ret/DD 2.36
+#     Combined score 4.51 (vs 0.65 for previous TP=0.75 config)
+#   Key insight: threshold=2.0 dominates — high-conviction signals only.
+#   Low WR (~23%) is fine because each win covers 2.67 losses.
+#   MAX_HOLD_HOURS kept at 8h — timeout trades close in partial profit on average.
 PAIR_CONFIG = {
     "EUR/USD": {
         "PRIMARY_TF":           "30m",
         "CONFIRM_TIMEFRAMES":   ["30m", "1h"],
         "SL_ATR_MULT":          1.5,
-        "TP1_ATR_MULT":         0.75,  # R:R 0.5 (TP=0.5×SL) — optimised 360d
-        "TP2_ATR_MULT":         1.5,
-        "SIGNAL_THRESHOLD":     1.2,
+        "TP1_ATR_MULT":         4.0,   # R:R 2.67 — grid-search winner 2026-07-17
+        "TP2_ATR_MULT":         6.0,
+        "SIGNAL_THRESHOLD":     2.0,   # raised from 1.2 — high-conviction only
         "MIN_CONFIDENCE":       55,
-        "MIN_ADX":              15,    # raised from 12 — filters choppy bars
+        "MIN_ADX":              15,
         "ADX_PERIOD":           14,
-        "SIGNAL_COOLDOWN_BARS": 2,     # 2 × 30m = 1h cooldown
+        "SIGNAL_COOLDOWN_BARS": 2,
         "SESSION_FILTER":       "overlap",
     },
     "GBP/USD": {
         "PRIMARY_TF":           "30m",
         "CONFIRM_TIMEFRAMES":   ["30m", "1h"],
         "SL_ATR_MULT":          1.5,
-        "TP1_ATR_MULT":         0.75,  # R:R 0.5 — matching EUR for consistency
-        "TP2_ATR_MULT":         1.5,
-        "SIGNAL_THRESHOLD":     1.2,
+        "TP1_ATR_MULT":         4.0,   # R:R 2.67 — grid-search winner 2026-07-17
+        "TP2_ATR_MULT":         6.0,
+        "SIGNAL_THRESHOLD":     2.0,
         "MIN_CONFIDENCE":       55,
         "MIN_ADX":              15,
         "ADX_PERIOD":           14,
-        "SIGNAL_COOLDOWN_BARS": 2,     # 2 × 30m = 1h cooldown
+        "SIGNAL_COOLDOWN_BARS": 2,
         "SESSION_FILTER":       "overlap",
     },
 }
