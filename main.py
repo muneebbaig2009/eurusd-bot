@@ -226,8 +226,15 @@ def run_pair(symbol):
 
 
 def main():
-    for symbol in config.PAIRS:
-        run_pair(symbol)
+    import MetaTrader5 as mt5
+    if not mt5.initialize():
+        print(f"MT5 initialize() failed: {mt5.last_error()} — is the terminal open and logged in?")
+        return
+    try:
+        for symbol in config.PAIRS:
+            run_pair(symbol)
+    finally:
+        mt5.shutdown()
 
 
 if __name__ == "__main__":
