@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-17T14:38:42.499920+00:00",
+  "updated_at": "2026-07-17T14:48:51.686138+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
     "losses": 2,
-    "open": 0,
-    "total": 2,
+    "open": 1,
+    "total": 3,
     "win_rate": 0.0
   },
   "weights": {
@@ -40,10 +40,10 @@
   "mt5_account": {
     "login": 109677040,
     "balance": 96525.43,
-    "equity": 97740.43,
-    "profit": 1215.0,
+    "equity": 98010.43,
+    "profit": 1485.0,
     "margin": 46441.32,
-    "free_margin": 51299.11,
+    "free_margin": 51569.11,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -61,17 +61,50 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-17T14:38:42.330807+00:00",
-    "signal_result": "no_conditions",
-    "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14388
+    "checked_at": "2026-07-17T14:48:51.680900+00:00",
+    "signal_result": "blocked_open",
+    "reason": "Open position exists \u2014 waiting for it to close",
+    "current_price": 1.1443
   },
   "laptop_battery": {
-    "percent": 42,
+    "percent": 37,
     "charging": false,
-    "secsleft": 6365
+    "secsleft": 5153
   },
   "signals": [
+    {
+      "id": 41,
+      "created_at": "2026-07-17T14:43:47.006392+00:00",
+      "direction": "BUY",
+      "entry": 1.14417,
+      "tp": 1.14472,
+      "sl": 1.14307,
+      "score": 1.45,
+      "contributors": {
+        "rsi": 0,
+        "ma_cross": 0,
+        "macd": 1,
+        "bbands": 0,
+        "ema_trend": 1,
+        "stoch": 0,
+        "supertrend": -1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.14472,
+      "tp2": 1.14527,
+      "confidence": 65,
+      "rr": 0.5,
+      "trend_strength": 23,
+      "timeframe": "30m",
+      "lot_size": 17.55,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
+      "pnl": null,
+      "balance_after": null
+    },
     {
       "id": 40,
       "created_at": "2026-07-16T14:37:29.804863+00:00",
