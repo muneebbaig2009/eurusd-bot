@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-18T07:43:30.691755+00:00",
+  "updated_at": "2026-07-18T07:48:34.299042+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 0,
@@ -58,15 +58,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-18T07:43:30.685332+00:00",
+    "checked_at": "2026-07-18T07:48:34.294736+00:00",
     "signal_result": "blocked_open",
     "reason": "Open position exists \u2014 waiting for it to close",
     "current_price": 1.34513
   },
   "laptop_battery": {
-    "percent": 94,
+    "percent": 91,
     "charging": false,
-    "secsleft": 10044
+    "secsleft": 14564
   },
   "signals": [
     {
