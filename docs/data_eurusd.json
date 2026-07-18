@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-18T09:40:08.311350+00:00",
+  "updated_at": "2026-07-18T09:45:12.290171+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -61,15 +61,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-18T09:40:08.306762+00:00",
+    "checked_at": "2026-07-18T09:45:12.285468+00:00",
     "signal_result": "blocked_open",
     "reason": "Open position exists \u2014 waiting for it to close",
     "current_price": 1.14381
   },
   "laptop_battery": {
-    "percent": 56,
+    "percent": 54,
     "charging": false,
-    "secsleft": 11084
+    "secsleft": 15986
   },
   "signals": [
     {
