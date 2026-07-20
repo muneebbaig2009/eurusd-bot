@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-20T15:33:14.942733+00:00",
+  "updated_at": "2026-07-20T15:38:19.726762+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 1,
@@ -64,16 +64,16 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-20T15:33:14.937927+00:00",
+    "checked_at": "2026-07-20T15:38:19.722112+00:00",
     "signal_result": "blocked_cooldown",
-    "cooldown_remaining_h": 0.6,
-    "reason": "Cooldown: 0.6h remaining after last close",
-    "current_price": 1.34182
+    "cooldown_remaining_h": 0.5,
+    "reason": "Cooldown: 0.5h remaining after last close",
+    "current_price": 1.34159
   },
   "laptop_battery": {
-    "percent": 63,
+    "percent": 61,
     "charging": false,
-    "secsleft": 12304
+    "secsleft": 11618
   },
   "signals": [
     {
