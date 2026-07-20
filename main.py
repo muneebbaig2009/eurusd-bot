@@ -17,9 +17,9 @@ import discord_poster
 import exporter
 
 
-def _close_and_notify(symbol, db, s, status, close_price):
+def _close_and_notify(symbol, db, s, status, close_price, close_time=None):
     """Close signal in DB, update learner + demo account, post to Discord."""
-    if not storage.close_signal(db, s["id"], status, close_price):
+    if not storage.close_signal(db, s["id"], status, close_price, closed_at=close_time):
         print(f"[{symbol}] #{s['id']} already closed; skipping.")
         return
     learner.update_weights(db, s["contributors"], s["direction"], won=(status == "WIN"))
@@ -70,8 +70,8 @@ def check_open_signals(symbol, db):
         # Primary check: has MT5 already closed the position (TP/SL hit)?
         result = mt5_executor.get_position_result(ticket)
         if result is not None:
-            status, close_price = result
-            _close_and_notify(symbol, db, s, status, close_price)
+            status, close_price, close_time = result
+            _close_and_notify(symbol, db, s, status, close_price, close_time)
             continue
 
         # EOD safeguard: close intraday positions that exceed MAX_HOLD_HOURS
@@ -88,13 +88,14 @@ def check_open_signals(symbol, db):
                         import time; time.sleep(0.5)
                         result2 = mt5_executor.get_position_result(ticket)
                         if result2:
-                            status, close_price = result2
+                            status, close_price, close_time = result2
                         else:
+                            close_time = None
                             # Fallback: classify by entry vs current price
                             entry = s["entry"]
                             close_price = entry   # neutral fallback
                             status = "LOSS"       # conservative
-                        _close_and_notify(symbol, db, s, status, close_price)
+                        _close_and_notify(symbol, db, s, status, close_price, close_time)
             except Exception as e:
                 print(f"[{symbol}] EOD close error #{s['id']}: {e}")
 

@@ -379,14 +379,20 @@ def close_pair_partner(db, pair_id: int, exclude_id: int,
             "sl": row[3], "lot_size": row[4]}
 
 
-def close_signal(db, signal_id: int, status: str, close_price: float) -> bool:
-    """Close a signal. Returns True only if this call changed the row."""
+def close_signal(db, signal_id: int, status: str, close_price: float,
+                 closed_at=None) -> bool:
+    """Close a signal. Returns True only if this call changed the row.
+
+    closed_at: UTC datetime of the actual MT5 deal. Falls back to now() when
+    not provided (e.g. manual closes, timeouts, or orphan cleanup).
+    """
+    ts = closed_at.isoformat() if closed_at is not None else datetime.now(timezone.utc).isoformat()
     con = _conn(db)
     cur = con.cursor()
     cur.execute(
         "UPDATE signals SET status=?, closed_at=?, close_price=? "
         "WHERE id=? AND status='OPEN'",
-        (status, datetime.now(timezone.utc).isoformat(), close_price, signal_id),
+        (status, ts, close_price, signal_id),
     )
     changed = cur.rowcount > 0
     con.commit()

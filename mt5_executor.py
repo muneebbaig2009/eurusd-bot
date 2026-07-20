@@ -132,11 +132,12 @@ def open_trade(symbol: str, direction: str, lot: float,
 
 
 def get_position_result(ticket: int):
-    """Return (status, close_price) if the position is closed, else None.
+    """Return (status, close_price, close_time) if the position is closed, else None.
 
-    Checks live positions first; if the ticket is gone, scans deal history for
-    the closing deal (DEAL_ENTRY_OUT) to determine WIN vs LOSS.
+    close_time is the UTC datetime of the actual MT5 deal — used as closed_at
+    so cooldown starts from when the trade actually closed, not detection time.
     """
+    from datetime import datetime, timezone
     # Still open?
     positions = mt5.positions_get(ticket=ticket)
     if positions is not None and len(positions) > 0:
@@ -149,8 +150,9 @@ def get_position_result(ticket: int):
 
     for deal in deals:
         if deal.entry == mt5.DEAL_ENTRY_OUT:
-            status = "WIN" if deal.profit > 0 else "LOSS"
-            return status, deal.price
+            status     = "WIN" if deal.profit > 0 else "LOSS"
+            close_time = datetime.fromtimestamp(deal.time, tz=timezone.utc)
+            return status, deal.price, close_time
 
     return None
 
