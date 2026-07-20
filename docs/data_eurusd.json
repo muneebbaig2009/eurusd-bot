@@ -1,10 +1,10 @@
 {
-  "updated_at": "2026-07-20T12:00:10.549344+00:00",
+  "updated_at": "2026-07-20T12:05:13.667512+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
-    "losses": 2,
-    "open": 1,
+    "losses": 3,
+    "open": 0,
     "total": 3,
     "win_rate": 0.0
   },
@@ -19,7 +19,8 @@
   },
   "equity": [
     -1,
-    -2
+    -2,
+    -3
   ],
   "demo": {
     "initial_balance": 100.0,
@@ -30,11 +31,13 @@
     "balance_history": [
       100.0,
       100.0,
+      -1899.06,
       -1899.06
     ],
     "per_signal_pnl": {
       "39": 0.0,
-      "40": -1999.06
+      "40": -1999.06,
+      "41": 0.0
     }
   },
   "mt5_account": {
@@ -61,13 +64,14 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-20T12:00:10.547008+00:00",
-    "signal_result": "blocked_open",
-    "reason": "Open position exists \u2014 waiting for it to close",
-    "current_price": 1.14287
+    "checked_at": "2026-07-20T12:05:13.660702+00:00",
+    "signal_result": "blocked_cooldown",
+    "cooldown_remaining_h": 1.0,
+    "reason": "Cooldown: 1.0h remaining after last close",
+    "current_price": 1.14281
   },
   "laptop_battery": {
-    "percent": 45,
+    "percent": 50,
     "charging": true,
     "secsleft": null
   },
@@ -89,9 +93,9 @@
         "stoch": 0,
         "supertrend": -1
       },
-      "status": "OPEN",
-      "closed_at": null,
-      "close_price": null,
+      "status": "LOSS",
+      "closed_at": "2026-07-20T12:02:37.248876+00:00",
+      "close_price": 1.14417,
       "tp1": 1.14472,
       "tp2": 1.14527,
       "confidence": 65,
@@ -102,8 +106,8 @@
       "trade_num": 1,
       "pair_id": null,
       "breakeven_active": false,
-      "pnl": null,
-      "balance_after": null
+      "pnl": 0.0,
+      "balance_after": -1899.06
     },
     {
       "id": 40,
