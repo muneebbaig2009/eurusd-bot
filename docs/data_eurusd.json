@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-20T14:42:17.687664+00:00",
+  "updated_at": "2026-07-20T14:47:22.465478+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -64,15 +64,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-20T14:42:17.558618+00:00",
+    "checked_at": "2026-07-20T14:47:22.387256+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14071
+    "current_price": 1.1409
   },
   "laptop_battery": {
-    "percent": 81,
+    "percent": 80,
     "charging": false,
-    "secsleft": 15515
+    "secsleft": 6352
   },
   "signals": [
     {
