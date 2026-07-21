@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-21T11:30:31.813332+00:00",
+  "updated_at": "2026-07-21T11:35:36.873452+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
@@ -64,15 +64,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-21T11:30:31.805634+00:00",
+    "checked_at": "2026-07-21T11:35:36.866696+00:00",
     "signal_result": "blocked_session",
     "reason": "Outside overlap session (UTC hour 11)",
-    "current_price": 1.14211
+    "current_price": 1.14214
   },
   "laptop_battery": {
-    "percent": 81,
+    "percent": 79,
     "charging": false,
-    "secsleft": 8067
+    "secsleft": 9961
   },
   "signals": [
     {
