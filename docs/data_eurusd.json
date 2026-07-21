@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-21T13:57:44.563595+00:00",
+  "updated_at": "2026-07-21T14:02:50.085689+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 0,
     "losses": 3,
-    "open": 0,
-    "total": 3,
+    "open": 1,
+    "total": 4,
     "win_rate": 0.0
   },
   "weights": {
@@ -43,10 +43,10 @@
   "mt5_account": {
     "login": 109677040,
     "balance": 99647.67,
-    "equity": 99647.67,
-    "profit": 0.0,
-    "margin": 0.0,
-    "free_margin": 99647.67,
+    "equity": 99577.35,
+    "profit": -70.32,
+    "margin": 72254.11,
+    "free_margin": 27323.24,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -64,17 +64,55 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-21T13:57:44.412293+00:00",
-    "signal_result": "no_conditions",
-    "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.14112
+    "checked_at": "2026-07-21T14:02:48.169561+00:00",
+    "signal_result": "generated",
+    "signal_id": 42,
+    "direction": "SELL",
+    "entry": 1.14128,
+    "lot_size": 23.44,
+    "confidence": 59,
+    "reason": "Signal #42 SELL @ 1.14128 | 23.44L",
+    "current_price": 1.14128
   },
   "laptop_battery": {
-    "percent": 16,
-    "charging": false,
-    "secsleft": 1478
+    "percent": 18,
+    "charging": true,
+    "secsleft": null
   },
   "signals": [
+    {
+      "id": 42,
+      "created_at": "2026-07-21T14:02:48.452861+00:00",
+      "direction": "SELL",
+      "entry": 1.14128,
+      "tp": 1.13902,
+      "sl": 1.14213,
+      "score": -2.0,
+      "contributors": {
+        "rsi": 0,
+        "ma_cross": -1,
+        "macd": -1,
+        "bbands": 0,
+        "ema_trend": -1,
+        "stoch": 1,
+        "supertrend": -1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.13902,
+      "tp2": 1.13789,
+      "confidence": 59,
+      "rr": 2.67,
+      "trend_strength": 20,
+      "timeframe": "30m",
+      "lot_size": 23.44,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
+      "pnl": null,
+      "balance_after": null
+    },
     {
       "id": 41,
       "created_at": "2026-07-17T14:43:47.006392+00:00",
