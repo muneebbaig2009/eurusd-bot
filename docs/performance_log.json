@@ -1,6 +1,16 @@
 {
-  "updated_at": "2026-07-15T07:39:28.530580+00:00",
+  "updated_at": "2026-07-21T11:56:01.715406+00:00",
   "history": [
+    {
+      "date": "2026-07-21 11:55",
+      "type": "daily_check",
+      "n_trades": 3,
+      "actual_wr": 0.0,
+      "actual_expectancy": -666.35,
+      "expected_wr": 62.2,
+      "expected_expectancy": 0.41,
+      "action": "early_reopt"
+    },
     {
       "date": "2026-07-15 07:39",
       "type": "daily_check",
