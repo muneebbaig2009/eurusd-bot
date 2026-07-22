@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-22T13:22:01.879731+00:00",
+  "updated_at": "2026-07-22T13:27:07.311437+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 1,
     "losses": 2,
-    "open": 0,
-    "total": 3,
+    "open": 1,
+    "total": 4,
     "win_rate": 33.3
   },
   "weights": {
@@ -43,10 +43,10 @@
   "mt5_account": {
     "login": 109677040,
     "balance": 101311.91,
-    "equity": 101311.91,
-    "profit": 0.0,
-    "margin": 0.0,
-    "free_margin": 101311.91,
+    "equity": 101324.65,
+    "profit": 12.74,
+    "margin": 43134.92,
+    "free_margin": 58189.73,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -74,10 +74,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-22T13:22:01.699252+00:00",
-    "signal_result": "no_conditions",
-    "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.33741
+    "checked_at": "2026-07-22T13:27:05.105137+00:00",
+    "signal_result": "generated",
+    "signal_id": 16,
+    "direction": "BUY",
+    "entry": 1.33791,
+    "lot_size": 12.74,
+    "confidence": 63,
+    "reason": "Signal #16 BUY @ 1.33791 | 12.74L",
+    "current_price": 1.33791
   },
   "laptop_battery": {
     "percent": 100,
@@ -85,6 +90,39 @@
     "secsleft": null
   },
   "signals": [
+    {
+      "id": 16,
+      "created_at": "2026-07-22T13:27:05.366216+00:00",
+      "direction": "BUY",
+      "entry": 1.33791,
+      "tp": 1.34216,
+      "sl": 1.33632,
+      "score": 2.15,
+      "contributors": {
+        "rsi": 0,
+        "ma_cross": 0,
+        "macd": 1,
+        "bbands": 0,
+        "ema_trend": -1,
+        "stoch": 1,
+        "supertrend": -1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.34216,
+      "tp2": 1.34429,
+      "confidence": 63,
+      "rr": 2.67,
+      "trend_strength": 18,
+      "timeframe": "30m",
+      "lot_size": 12.74,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
+      "pnl": null,
+      "balance_after": null
+    },
     {
       "id": 15,
       "created_at": "2026-07-20T14:52:26.097499+00:00",
