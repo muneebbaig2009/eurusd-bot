@@ -1,52 +1,55 @@
 {
-  "updated_at": "2026-07-21T16:54:49.004413+00:00",
+  "updated_at": "2026-07-22T03:11:51.664467+00:00",
   "symbol": "EUR/USD",
   "stats": {
-    "wins": 0,
+    "wins": 1,
     "losses": 3,
-    "open": 1,
+    "open": 0,
     "total": 4,
-    "win_rate": 0.0
+    "win_rate": 25.0
   },
   "weights": {
     "bbands": 1.45,
-    "ema_trend": 0.75,
-    "ma_cross": 0.8,
-    "macd": 1.55,
+    "ema_trend": 0.8,
+    "ma_cross": 0.8500000000000001,
+    "macd": 1.6,
     "rsi": 2.0,
-    "stoch": 1.95,
-    "supertrend": 0.8500000000000001
+    "stoch": 1.9,
+    "supertrend": 0.9000000000000001
   },
   "equity": [
     -1,
     -2,
-    -3
+    -3,
+    -2
   ],
   "demo": {
     "initial_balance": 100.0,
-    "balance": -1899.06,
-    "pnl_total": -1999.06,
-    "return_pct": -1999.1,
+    "balance": -187.94,
+    "pnl_total": -287.94,
+    "return_pct": -287.9,
     "risk_pct": 2.0,
     "balance_history": [
       100.0,
       100.0,
       -1899.06,
-      -1899.06
+      -1899.06,
+      -187.94
     ],
     "per_signal_pnl": {
       "39": 0.0,
       "40": -1999.06,
-      "41": 0.0
+      "41": 0.0,
+      "42": 1711.12
     }
   },
   "mt5_account": {
     "login": 109677040,
-    "balance": 99647.67,
-    "equity": 100772.79,
-    "profit": 1125.12,
-    "margin": 72254.11,
-    "free_margin": 28518.68,
+    "balance": 101311.91,
+    "equity": 101311.91,
+    "profit": 0.0,
+    "margin": 0.0,
+    "free_margin": 101311.91,
     "currency": "USD",
     "leverage": 100,
     "server": "MetaQuotes-Demo"
@@ -64,15 +67,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-21T16:54:48.995014+00:00",
-    "signal_result": "blocked_open",
-    "reason": "Open position exists \u2014 waiting for it to close",
-    "current_price": 1.14078
+    "checked_at": "2026-07-22T03:11:51.655818+00:00",
+    "signal_result": "blocked_session",
+    "reason": "Outside overlap session (UTC hour 3)",
+    "current_price": 1.14054
   },
   "laptop_battery": {
-    "percent": 100,
-    "charging": true,
-    "secsleft": null
+    "percent": 98,
+    "charging": false,
+    "secsleft": 4667
   },
   "signals": [
     {
@@ -92,9 +95,9 @@
         "stoch": 1,
         "supertrend": -1
       },
-      "status": "OPEN",
-      "closed_at": null,
-      "close_price": null,
+      "status": "WIN",
+      "closed_at": "2026-07-22T06:11:48+00:00",
+      "close_price": 1.14055,
       "tp1": 1.13902,
       "tp2": 1.13789,
       "confidence": 59,
@@ -105,8 +108,8 @@
       "trade_num": 1,
       "pair_id": null,
       "breakeven_active": false,
-      "pnl": null,
-      "balance_after": null
+      "pnl": 1711.12,
+      "balance_after": -187.94
     },
     {
       "id": 41,
