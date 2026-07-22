@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-22T05:03:50.639398+00:00",
+  "updated_at": "2026-07-22T11:33:00.543743+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 1,
@@ -40,17 +40,49 @@
       "15": -2031.84
     }
   },
-  "mt5_account": {},
-  "mt5_trades": [],
+  "mt5_account": {
+    "login": 109677040,
+    "balance": 101311.91,
+    "equity": 101311.91,
+    "profit": 0.0,
+    "margin": 0.0,
+    "free_margin": 101311.91,
+    "currency": "USD",
+    "leverage": 100,
+    "server": "MetaQuotes-Demo"
+  },
+  "mt5_trades": [
+    {
+      "ticket": 9665131285,
+      "time": "2026-07-22T06:11:48+00:00",
+      "symbol": "EURUSD",
+      "type": "BUY",
+      "volume": 23.44,
+      "price": 1.14055,
+      "profit": 1687.68,
+      "comment": "eurusd-bot close #9656399524"
+    },
+    {
+      "ticket": 9570220998,
+      "time": "2026-07-15T10:52:59+00:00",
+      "symbol": "EURUSD",
+      "type": "SELL",
+      "volume": 0.01,
+      "price": 1.1424,
+      "profit": -0.02,
+      "comment": "eurusd-bot close #9570220639"
+    }
+  ],
   "cycle_status": {
-    "checked_at": "2026-07-22T05:03:50.634046+00:00",
-    "signal_result": "data_error",
-    "reason": "MT5 data fetch failed: MT5: no candle data for GBPUSD 1h. Error: (-10001, 'IPC send failed')"
+    "checked_at": "2026-07-22T11:33:00.541142+00:00",
+    "signal_result": "blocked_session",
+    "reason": "Outside overlap session (UTC hour 11)",
+    "current_price": 1.33677
   },
   "laptop_battery": {
     "percent": 55,
-    "charging": false,
-    "secsleft": 6550
+    "charging": true,
+    "secsleft": null
   },
   "signals": [
     {
