@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-07-23T10:10:27.411924+00:00",
+  "updated_at": "2026-07-23T12:55:56.609899+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 2,
     "losses": 2,
-    "open": 0,
-    "total": 4,
+    "open": 1,
+    "total": 5,
     "win_rate": 50.0
   },
   "weights": {
@@ -43,19 +43,99 @@
       "16": 738.92
     }
   },
-  "mt5_account": {},
-  "mt5_trades": [],
+  "mt5_account": {
+    "login": 109677040,
+    "balance": 102043.19,
+    "equity": 102055.94,
+    "profit": 12.75,
+    "margin": 43026.65,
+    "free_margin": 59029.29,
+    "currency": "USD",
+    "leverage": 100,
+    "server": "MetaQuotes-Demo"
+  },
+  "mt5_trades": [
+    {
+      "ticket": 9684046849,
+      "time": "2026-07-23T06:14:23+00:00",
+      "symbol": "GBPUSD",
+      "type": "SELL",
+      "volume": 12.74,
+      "price": 1.33849,
+      "profit": 738.92,
+      "comment": "eurusd-bot close #9674158349"
+    },
+    {
+      "ticket": 9665131285,
+      "time": "2026-07-22T06:11:48+00:00",
+      "symbol": "EURUSD",
+      "type": "BUY",
+      "volume": 23.44,
+      "price": 1.14055,
+      "profit": 1687.68,
+      "comment": "eurusd-bot close #9656399524"
+    },
+    {
+      "ticket": 9570220998,
+      "time": "2026-07-15T10:52:59+00:00",
+      "symbol": "EURUSD",
+      "type": "SELL",
+      "volume": 0.01,
+      "price": 1.1424,
+      "profit": -0.02,
+      "comment": "eurusd-bot close #9570220639"
+    }
+  ],
   "cycle_status": {
-    "checked_at": "2026-07-23T10:10:27.407807+00:00",
-    "signal_result": "data_error",
-    "reason": "MT5 data fetch failed: MT5: no candle data for GBPUSD 1h. Error: (-10001, 'IPC send failed')"
+    "checked_at": "2026-07-23T12:55:55.502303+00:00",
+    "signal_result": "generated",
+    "signal_id": 17,
+    "direction": "BUY",
+    "entry": 1.33403,
+    "lot_size": 12.75,
+    "confidence": 55,
+    "reason": "Signal #17 BUY @ 1.33403 | 12.75L",
+    "current_price": 1.33403
   },
   "laptop_battery": {
-    "percent": 90,
+    "percent": 88,
     "charging": false,
-    "secsleft": 21702
+    "secsleft": 4689
   },
   "signals": [
+    {
+      "id": 17,
+      "created_at": "2026-07-23T12:55:55.545864+00:00",
+      "direction": "BUY",
+      "entry": 1.33403,
+      "tp": 1.33829,
+      "sl": 1.33243,
+      "score": 2.35,
+      "contributors": {
+        "rsi": 1,
+        "ma_cross": 0,
+        "macd": -1,
+        "bbands": 1,
+        "ema_trend": -1,
+        "stoch": 1,
+        "supertrend": -1
+      },
+      "status": "OPEN",
+      "closed_at": null,
+      "close_price": null,
+      "tp1": 1.33829,
+      "tp2": 1.34042,
+      "confidence": 55,
+      "rr": 2.67,
+      "trend_strength": 28,
+      "timeframe": "30m",
+      "lot_size": 12.75,
+      "trade_num": 1,
+      "pair_id": null,
+      "breakeven_active": false,
+      "pnl": null,
+      "balance_after": null
+    },
     {
       "id": 16,
       "created_at": "2026-07-22T13:27:05.366216+00:00",
