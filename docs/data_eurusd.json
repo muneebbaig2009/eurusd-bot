@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-24T16:52:23.240059+00:00",
+  "updated_at": "2026-07-24T16:57:27.345841+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 1,
@@ -90,16 +90,16 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-24T16:52:23.234183+00:00",
+    "checked_at": "2026-07-24T16:57:27.340710+00:00",
     "signal_result": "blocked_cooldown",
-    "cooldown_remaining_h": 2.3,
-    "reason": "Cooldown: 2.3h remaining after last close",
-    "current_price": 1.13788
+    "cooldown_remaining_h": 2.2,
+    "reason": "Cooldown: 2.2h remaining after last close",
+    "current_price": 1.13795
   },
   "laptop_battery": {
-    "percent": 51,
+    "percent": 50,
     "charging": false,
-    "secsleft": 10357
+    "secsleft": 9722
   },
   "signals": [
     {
