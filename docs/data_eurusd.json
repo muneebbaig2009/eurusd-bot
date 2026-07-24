@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-24T12:55:42.145347+00:00",
+  "updated_at": "2026-07-24T13:00:45.430989+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 1,
@@ -43,57 +43,15 @@
       "42": 1711.12
     }
   },
-  "mt5_account": {
-    "login": 109677040,
-    "balance": 100003.19,
-    "equity": 100003.19,
-    "profit": 0.0,
-    "margin": 0.0,
-    "free_margin": 100003.19,
-    "currency": "USD",
-    "leverage": 100,
-    "server": "MetaQuotes-Demo"
-  },
-  "mt5_trades": [
-    {
-      "ticket": 9684046849,
-      "time": "2026-07-23T06:14:23+00:00",
-      "symbol": "GBPUSD",
-      "type": "SELL",
-      "volume": 12.74,
-      "price": 1.33849,
-      "profit": 738.92,
-      "comment": "eurusd-bot close #9674158349"
-    },
-    {
-      "ticket": 9665131285,
-      "time": "2026-07-22T06:11:48+00:00",
-      "symbol": "EURUSD",
-      "type": "BUY",
-      "volume": 23.44,
-      "price": 1.14055,
-      "profit": 1687.68,
-      "comment": "eurusd-bot close #9656399524"
-    },
-    {
-      "ticket": 9570220998,
-      "time": "2026-07-15T10:52:59+00:00",
-      "symbol": "EURUSD",
-      "type": "SELL",
-      "volume": 0.01,
-      "price": 1.1424,
-      "profit": -0.02,
-      "comment": "eurusd-bot close #9570220639"
-    }
-  ],
+  "mt5_account": {},
+  "mt5_trades": [],
   "cycle_status": {
-    "checked_at": "2026-07-24T12:55:41.981493+00:00",
-    "signal_result": "no_conditions",
-    "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.13697
+    "checked_at": "2026-07-24T13:00:45.421030+00:00",
+    "signal_result": "data_error",
+    "reason": "MT5 data fetch failed: MT5: no candle data for EURUSD 1h. Error: (-10001, 'IPC send failed')"
   },
   "laptop_battery": {
-    "percent": 68,
+    "percent": 73,
     "charging": true,
     "secsleft": null
   },
