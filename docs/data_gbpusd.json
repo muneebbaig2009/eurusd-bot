@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-27T12:23:26.726516+00:00",
+  "updated_at": "2026-07-27T12:28:31.236345+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 2,
@@ -90,15 +90,15 @@
     }
   ],
   "cycle_status": {
-    "checked_at": "2026-07-27T12:23:26.638336+00:00",
+    "checked_at": "2026-07-27T12:28:31.143237+00:00",
     "signal_result": "no_conditions",
     "reason": "No signal conditions met this cycle (score/ADX/confidence below thresholds)",
-    "current_price": 1.33115
+    "current_price": 1.33144
   },
   "laptop_battery": {
-    "percent": 23,
+    "percent": 22,
     "charging": false,
-    "secsleft": 5206
+    "secsleft": 2146
   },
   "signals": [
     {
