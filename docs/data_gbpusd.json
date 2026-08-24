@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-24T05:57:05.931570+00:00",
+  "updated_at": "2026-08-24T06:02:09.725963+00:00",
   "symbol": "GBP/USD",
   "stats": {
     "wins": 2,
@@ -49,14 +49,14 @@
   "mt5_account": {},
   "mt5_trades": [],
   "cycle_status": {
-    "checked_at": "2026-08-24T05:57:05.923889+00:00",
+    "checked_at": "2026-08-24T06:02:09.720301+00:00",
     "signal_result": "data_error",
     "reason": "MT5 data fetch failed: MT5: no candle data for GBPUSD 1h. Error: (-10001, 'IPC send failed')"
   },
   "laptop_battery": {
-    "percent": 100,
-    "charging": true,
-    "secsleft": null
+    "percent": 98,
+    "charging": false,
+    "secsleft": 16914
   },
   "signals": [
     {
