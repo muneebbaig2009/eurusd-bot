@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-27T03:47:21.818859+00:00",
+  "updated_at": "2026-08-27T03:52:25.524428+00:00",
   "symbol": "EUR/USD",
   "stats": {
     "wins": 1,
@@ -52,12 +52,12 @@
   "mt5_account": {},
   "mt5_trades": [],
   "cycle_status": {
-    "checked_at": "2026-08-27T03:47:21.806551+00:00",
+    "checked_at": "2026-08-27T03:52:25.515877+00:00",
     "signal_result": "data_error",
     "reason": "MT5 data fetch failed: MT5: no candle data for EURUSD 1h. Error: (-10001, 'IPC send failed')"
   },
   "laptop_battery": {
-    "percent": 81,
+    "percent": 84,
     "charging": true,
     "secsleft": null
   },
